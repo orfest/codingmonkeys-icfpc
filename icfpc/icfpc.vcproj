@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="vm.lib"
+				AdditionalDependencies="vm.lib brain1.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="../debug"
 				GenerateDebugInformation="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="vm.lib"
+				AdditionalDependencies="vm.lib brain1.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../release"
 				GenerateDebugInformation="true"
@@ -204,6 +204,10 @@
 			>
 			<File
 				RelativePath="..\include\brain.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\common.h"
 				>
 			</File>
 			<File
