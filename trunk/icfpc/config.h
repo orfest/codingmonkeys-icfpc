@@ -10,7 +10,7 @@ struct Config{
     std::string trace_output;
     bool gui;
     int problem;
-    Config():program_file("../downloads/bin1.obf"), trace_output("result.osf"), gui(false), problem(0){}
+    Config():program_file("../download/bin1.obf"), trace_output("result.osf"), gui(false), problem(0){}
     bool parse(int argc, char* argv[]);
 };
 
