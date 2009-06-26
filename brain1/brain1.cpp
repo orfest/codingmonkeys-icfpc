@@ -13,5 +13,5 @@ PortMapping B1::step(const PortMapping& output){
 }
 
 bool B1::finished() const{
-    return true;
+    return false;
 }

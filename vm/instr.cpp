@@ -31,7 +31,7 @@ addr_t Instr::getSReg(code_t op){
 }
 
 opcode_t Instr::getCmpOpcode(code_t op){
-    return getBits(op, 20, 23);
+    return getBits(op, 21, 23);
 }
 
 opcode_t Instr::getDOpcode(code_t op){
