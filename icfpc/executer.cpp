@@ -5,8 +5,8 @@
 using namespace std;
 
 bool Executer::run(){
-    vector<PortValue> input = brain->initialStep();
-    vector<PortValue> output;
+    PortMapping input = brain->initialStep();
+    PortMapping output;
     while (!brain->finished()){
         output = vm->step(input);
         input = brain->step(output);

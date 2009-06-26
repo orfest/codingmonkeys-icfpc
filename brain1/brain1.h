@@ -8,8 +8,8 @@
 class B1 : public Brain{
 public:
     B1(){}
-    virtual std::vector<PortValue> initialStep();
-    virtual std::vector<PortValue> step(const std::vector<PortValue>& output);
+    virtual PortMapping initialStep();
+    virtual PortMapping step(const PortMapping& output);
     virtual bool finished() const;
 };
 

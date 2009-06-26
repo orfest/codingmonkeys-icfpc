@@ -9,7 +9,7 @@
 class Tracer{
 public:
     Tracer(const std::string& file);
-    void add(const std::vector<PortValue>& data);
+    void add(const PortMapping& data);
     void dump() const;
 };
 

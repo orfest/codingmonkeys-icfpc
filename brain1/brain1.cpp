@@ -4,12 +4,12 @@
 
 using namespace std;
 
-vector<PortValue> B1::initialStep(){
-    return vector<PortValue>();
+PortMapping B1::initialStep(){
+    return PortMapping();
 }
 
-vector<PortValue> B1::step(const vector<PortValue>& output){
-    return vector<PortValue>();
+PortMapping B1::step(const PortMapping& output){
+    return PortMapping();
 }
 
 bool B1::finished() const{
