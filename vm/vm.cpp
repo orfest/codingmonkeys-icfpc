@@ -15,7 +15,6 @@ bit_t bit(bool a){
     return a ? 1 : 0;
 }
 
-
 VM::VM(const string& file) : program_counter_register(0), status_register(0) {
     code_memory.resize(MEM_SIZE, Instr::getNoop());   
     data_memory.resize(MEM_SIZE, 0.0);
@@ -49,12 +48,10 @@ VM::VM(const string& file) : program_counter_register(0), status_register(0) {
     }
 }
 
-
 PortMapping VM::step(const PortMapping& input){
     input_mapping = input;
     output_mapping.clear();
-    for (bool running = true; running;){
-        bool will_inc = true;
+    for (program_counter_register = 0; program_counter_register < MEM_SIZE;){
         bool store_result = true;
         data_t res;
 
@@ -64,12 +61,10 @@ PortMapping VM::step(const PortMapping& input){
             opcode = Instr::getSOpcode(op);
             int imm = Instr::getSImm(op);
             addr_t reg = Instr::getSReg(op);
-            data_t res;
 
             if (opcode == Instr::NOOP){
                 res = data_memory[program_counter_register];
             } else if (opcode == Instr::CMPZ){
-                will_inc = false;
                 store_result = false;
                 data_t v = data_memory[program_counter_register];
                 opcode_t cmp_opcode = Instr::getCmpOpcode(op);
@@ -132,11 +127,9 @@ PortMapping VM::step(const PortMapping& input){
         if (store_result){
             data_memory[program_counter_register] = res;
         }
-        if (will_inc){
-            program_counter_register++;
-        }
+        program_counter_register++;
     }
-    return PortMapping();
+    return output_mapping;
 }
 
 data_t VM::do_input(addr_t reg){
