@@ -85,7 +85,11 @@ PortMapping VM::step(const PortMapping& input){
                 }
                 status_register = br;
             } else if (opcode == Instr::SQRT){
-                res = sqrt(abs(data_memory[reg]));      //TODO!!! Should it be abs(data[reg]) ???
+                if (data_memory[reg] < 0){
+                    cerr << "Spec 1.5 says sqrt for negative values is undefined. Dying!\n";
+                    throw exception("sqrt for negative values");
+                }
+                res = sqrt(data_memory[reg]);
             } else if (opcode == Instr::COPY){
                 res = data_memory[reg];
             } else if (opcode == Instr::INPUT){
