@@ -22,8 +22,8 @@ private:
     std::vector<code_t> code_memory;
     std::vector<data_t> data_memory;
 
-    addr_t program_counter_register;
-    bit_t status_register;
+//    addr_t program_counter_register; wiped out
+    bit_t status_register;          //!!TODO!!: should it be initialized at every program run?
 
     data_t do_input(addr_t reg);
     void do_output(addr_t reg, data_t value);

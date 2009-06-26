@@ -15,7 +15,7 @@ bit_t bit(bool a){
     return a ? 1 : 0;
 }
 
-VM::VM(const string& file) : program_counter_register(0), status_register(0) {
+VM::VM(const string& file) : status_register(0) {
     code_memory.resize(MEM_SIZE, Instr::getNoop());   
     data_memory.resize(MEM_SIZE, 0.0);
     ifstream is(file.c_str(), ios_base::binary | ios_base::in);
@@ -51,7 +51,8 @@ VM::VM(const string& file) : program_counter_register(0), status_register(0) {
 PortMapping VM::step(const PortMapping& input){
     input_mapping = input;
     output_mapping.clear();
-    for (program_counter_register = 0; program_counter_register < MEM_SIZE;){
+    status_register = 0;        //!!TODO!! ???
+    for (addr_t program_counter_register = 0; program_counter_register < MEM_SIZE;){
         bool store_result = true;
         data_t res;
 
