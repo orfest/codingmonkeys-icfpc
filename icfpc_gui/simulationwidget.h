@@ -11,12 +11,13 @@ class SimulationWidget : public QWidget{
 
     static const qreal EARTH_RADIUS;
     static const qreal MIN_X_OR_Y;
-    static const int SHIP_SIZE = 4;
+    static const int SHIP_SIZE = 8;
 
 public:
     SimulationWidget(QWidget* parent = 0);
     void addShipsPositions(const std::vector<std::pair<double,double> >& points);
     void setShipsNumber(int ships_number);
+	void reset();
 
 protected:
     void paintEvent(QPaintEvent* event);

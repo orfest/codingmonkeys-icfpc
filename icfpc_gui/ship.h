@@ -14,6 +14,7 @@ public:
     const QVector<QPointF>& getTrack() const { return track; }
     void pushPosition(const QPointF& p);
     void setColor(QColor col) { color = col; }
+	const void reset() { track.clear(); }
 };
 
 #endif //SHIP_H
