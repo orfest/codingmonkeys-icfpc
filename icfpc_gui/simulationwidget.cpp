@@ -6,7 +6,7 @@
 #include <math.h>
 
 const qreal SimulationWidget::EARTH_RADIUS = 6357000;
-const qreal SimulationWidget::MIN_X_OR_Y = 6*EARTH_RADIUS;
+qreal SimulationWidget::MIN_X_OR_Y = 6*EARTH_RADIUS;
 
 SimulationWidget::SimulationWidget(QWidget* parent) : QWidget(parent){
 }
