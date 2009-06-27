@@ -10,12 +10,14 @@
 #include "vector.h"
 
 Brain* Brain::getBrain(int problem, int scenarioNumber){
-    if (problem == 0){
+    if (problem == 0) {
         return new B1(scenarioNumber);
-    } else if (problem == 1){
+    } else if (problem == 1) {
         return new B2(scenarioNumber);
-    } else if (problem == 2){
+    } else if (problem == 2) {
         return new B3(scenarioNumber);
+    } else if (problem == 3) {
+        return new B4(scenarioNumber);
     } else {
         throw new std::exception("Unknown problem type");
     }
