@@ -17,6 +17,7 @@ private:
     std::ofstream of;
     PortMapping prev;
     std::vector<uint32> trace_data;
+    void push_double(double value);
 };
 
 #endif //TRACER_H

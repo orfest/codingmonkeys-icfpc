@@ -17,7 +17,7 @@ Tracer::Tracer(const string& file, int scenario_number) :
     }
     trace_data.push_back(0xCAFEBABE);
     trace_data.push_back(TEAM_ID);
-    trace_data.push_back(scenario_number);
+    push_double(scenario_number);
 }
 
 void Tracer::add(const PortMapping& data, int timestep){
@@ -34,23 +34,24 @@ void Tracer::add(const PortMapping& data, int timestep){
     for (PortMapping::const_iterator it = change.begin(); it != change.end(); it++){
         trace_data.push_back(it->first);
         data_t to_store = it->second;
-        data_t* ptr = &to_store;
-        void* vptr = static_cast<void*>(ptr);
-        uint32* uiptr = static_cast<uint32*>(vptr);
-        trace_data.push_back(uiptr[0]);
-        trace_data.push_back(uiptr[1]);
+        push_double(to_store);
         prev[it->first] = it->second;
     }
 }
 
-void Tracer::dump(int timestep) {
-    trace_data.push_back(timestep);
-    data_t to_store = 0;
+void Tracer::push_double(double to_store){
     data_t* ptr = &to_store;
     void* vptr = static_cast<void*>(ptr);
     uint32* uiptr = static_cast<uint32*>(vptr);
     trace_data.push_back(uiptr[0]);
     trace_data.push_back(uiptr[1]);
+}
+
+void Tracer::dump(int timestep) {
+    trace_data.push_back(timestep);
+    data_t to_store = 0;
+    push_double(to_store);
+   
     of.write(reinterpret_cast<const char*>(&(trace_data[0])), trace_data.size() * sizeof(uint32));
     of.close();
 }
