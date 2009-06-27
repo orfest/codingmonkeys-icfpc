@@ -23,6 +23,8 @@ static const addr_t SCORE_PORT = 0x0;
 static const addr_t FUEL_PORT = 0x1;
 static const addr_t EARTH_X = 0x2;
 static const addr_t EARTH_Y = 0x3;
+static const addr_t SATELLITE_X = 0x4;
+static const addr_t SATELLITE_Y = 0x5;
 
 //B1
 static const addr_t TARGET_RADIUS = 0x4;

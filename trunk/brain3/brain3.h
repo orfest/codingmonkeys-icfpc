@@ -4,6 +4,7 @@
 #include "brain.h"
 
 #include "common.h"
+#include "vector.h"
 
 class B3 : public Brain{
 public:
@@ -16,8 +17,24 @@ public:
 private:
     PortMapping prevResult;
     PortMapping prevInput;
-	double r1;
-	double r2;
+	Vector startMeEarth;
+	Vector startTargEarth;
+	double rFromMin;
+	double rFromMax;
+	double rToMin;
+	double rToMax;
+	bool rFromKnown;
+	bool rToKnown;
+	double periodFrom;
+	double periodTo;
+	enum State {measuring, 
+				waitingJumpFrom, 
+				jumpedFromCircular, 
+				jumpedToCircular, 
+				waitingJumpTo, 
+				following
+			   } state;
+
 	double transferTime;
 	bool clockwise;
 };
