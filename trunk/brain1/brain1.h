@@ -11,6 +11,8 @@ public:
     virtual PortMapping initialStep();
     virtual PortMapping step(const PortMapping& output);
     virtual bool finished() const;
+    virtual std::vector<pointF> getShipsPositions() const;
+    virtual int getShipsNumber() const;
 };
 
 #endif //BRAIN1_H

@@ -13,5 +13,19 @@ PortMapping B1::step(const PortMapping& output){
 }
 
 bool B1::finished() const{
-    return false;
+    static int cnt = 50;
+    cnt--;
+    return cnt <= 0;
+}
+
+vector<pointF> B1::getShipsPositions() const{
+    static int cnt = 15;
+    vector<pointF> res;
+    res.push_back(pointF(10000000, 500000*cnt));
+    cnt--;
+    return res;
+}
+
+int B1::getShipsNumber() const{
+    return 1;
 }
