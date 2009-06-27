@@ -4,6 +4,7 @@
 #include "brain.h"
 
 #include "common.h"
+#include "vector.h"
 
 class B2 : public Brain{
 public:
@@ -16,10 +17,16 @@ public:
 private:
     PortMapping prevResult;
     PortMapping prevInput;
-	double r1;
-	double r2;
+	double me_r;
+	double that_r;
 	double transferTime;
-	bool clockwise;
+	bool me_clockwise;
+    bool that_clockwise;
+    bool needTurnAround;
+    int startTime;
+    double delta_v1;
+
+    double getAngle(const Vector& v) const;
 };
 
 #endif //BRAIN2_H
