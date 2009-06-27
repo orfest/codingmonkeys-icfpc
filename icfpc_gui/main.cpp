@@ -10,8 +10,8 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    //freopen("out","wt",stdout);
-    //freopen("err","wt",stderr);
+    freopen("out","wt",stdout);
+    freopen("err","wt",stderr);
     Config config;
     if (!config.parse(argc, argv)){
         return -1;

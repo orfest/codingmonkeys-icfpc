@@ -8,18 +8,24 @@ using namespace std;
 B1::B1(int sn):Brain(sn){}
 
 PortMapping B1::step(const PortMapping& output){
-    //cout << output.find(EARTH_X)->second << endl;
-    //cout << output.find(EARTH_Y)->second << endl;
-    //cout << output.find(FUEL_PORT)->second << endl;
-    //cout << output.find(SCORE_PORT)->second << endl;
+	/*
+    cout << output.find(EARTH_X)->second << endl;
+    cout << output.find(EARTH_Y)->second << endl;
+    cout << "\t\t\t" << output.find(FUEL_PORT)->second << endl;
+    cout << output.find(SCORE_PORT)->second << endl;
+	cout << output.find(TARGET_RADIUS)->second << endl;
+	cout << "------------" << endl;
+	*/
     PortMapping res;
-    res[SCENARIO_PORT] = 0;//Brain::scenarioNumber;
-//    static int g = 10000;
+	//static int step = 1;
+	res[SCENARIO_PORT] = 0;
+    //static double g = 1000;
     res[VX_PORT] = 0;
- //   g -= 1000;
-    res[VY_PORT] = 0;
+	res[VY_PORT] = 0; //step > 3 ? 0 : g;
+	//g += 1000;
     prevResult = res;
     prevInput = output;
+	//step++;
     return res;
 }
 

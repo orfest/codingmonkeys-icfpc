@@ -7,6 +7,7 @@
 #include <exception>
 #include <cmath>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <io.h>
@@ -76,7 +77,7 @@ PortMapping VM::step(const PortMapping& input){
                 //res = data_memory[program_counter_register];
             } else if (opcode == Instr::CMPZ){
                 store_result = false;
-                data_t v = data_memory[program_counter_register];
+                data_t v = data_memory[reg];
                 opcode_t cmp_opcode = Instr::getCmpOpcode(op);
                 bit_t br;
                 if (cmp_opcode == Instr::LTZ){
@@ -140,7 +141,7 @@ PortMapping VM::step(const PortMapping& input){
         }
         if (store_result){
             if (res == MAGIC){
-                int i = 1;
+                assert(false);
             }
             data_memory[program_counter_register] = res;
         }
