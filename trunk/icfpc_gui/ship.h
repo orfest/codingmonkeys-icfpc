@@ -19,7 +19,8 @@ public:
     void setColor(QColor col) { color = col; }
 	const void reset() { track.clear(); }
 private:
-	void removeExcessTrackPoints(int maxPoints = 400);
+	void removeExcessTrackPoints(int maxPoints = 1000);
+	void doSweep();
 };
 
 #endif //SHIP_H
