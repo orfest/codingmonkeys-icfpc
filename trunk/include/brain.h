@@ -18,6 +18,8 @@ protected:
     Brain(int sn):scenarioNumber(sn),timestep(0){}
     int scenarioNumber;
     int timestep;
+
+	PortMapping & fuelOveruseFailsafe(const PortMapping & sensors, PortMapping & actuators);
 };
 
 #endif //BRAIN_H
