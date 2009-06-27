@@ -17,13 +17,13 @@ Tracer::Tracer(const string& file, int scenario_number) :
     }
     trace_data.push_back(0xCAFEBABE);
     trace_data.push_back(TEAM_ID);
-    push_double(scenario_number);
+    trace_data.push_back(scenario_number);
 }
 
 void Tracer::add(const PortMapping& data, int timestep){
     PortMapping change;
     for (PortMapping::const_iterator it = data.begin(); it != data.end(); it++){
-        if (it->first == SCENARIO_PORT) continue;
+        //if (it->first == SCENARIO_PORT) continue;
         if (prev.find(it->first) == prev.end() || prev[it->first] != it->second){
             change[it->first] = it->second;
         }
