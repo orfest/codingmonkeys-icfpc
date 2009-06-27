@@ -5,6 +5,7 @@
 
 #include "brain1.h"
 #include "brain2.h"
+#include "brain2_2.h"
 #include "brain3.h"
 #include "brain4.h"
 #include "vector.h"
@@ -13,7 +14,7 @@ Brain* Brain::getBrain(int problem, int scenarioNumber){
     if (problem == 0) {
         return new B1(scenarioNumber);
     } else if (problem == 1) {
-        return new B2(scenarioNumber);
+        return new B2_2(scenarioNumber);
     } else if (problem == 2) {
         return new B3(scenarioNumber);
     } else if (problem == 3) {
