@@ -24,7 +24,7 @@ void SimulationWidget::paintEvent(QPaintEvent*){
     int hei = height();
     int smallest_dimension = qMin(wid,hei);
     qreal meter_per_pixel = MIN_X_OR_Y / ((qreal)smallest_dimension);
-    int earth = qRound(EARTH_RADIUS / meter_per_pixel);
+    int earth = qRound(2.0 * EARTH_RADIUS / meter_per_pixel);
     int mid_x = qRound(wid*0.5);
     int mid_y = qRound(hei*0.5);
     QPainter painter(this);
