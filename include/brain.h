@@ -7,14 +7,16 @@
 
 class Brain{
 public:
-    static Brain* getBrain(int problem);
-    virtual PortMapping initialStep() = 0;
+    static Brain* getBrain(int problem, int scenarioNumber);
     virtual PortMapping step(const PortMapping& output) = 0;
-    virtual bool finished() const = 0;
+    bool finished(const PortMapping& output) const;
+
     virtual std::vector<pointF> getShipsPositions() const = 0;
     virtual int getShipsNumber() const = 0;
+
 protected:
-    Brain(){}
+    Brain(int sn):scenarioNumber(sn){}
+    int scenarioNumber;
 };
 
 #endif //BRAIN_H

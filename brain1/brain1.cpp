@@ -1,28 +1,32 @@
 #include "brain1.h"
 
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
-PortMapping B1::initialStep(){
-    return PortMapping();
-}
+B1::B1(int sn):Brain(sn){}
 
 PortMapping B1::step(const PortMapping& output){
-    return PortMapping();
-}
-
-bool B1::finished() const{
-    static int cnt = 50;
-    cnt--;
-    return cnt <= 0;
+    //cout << output.find(EARTH_X)->second << endl;
+    //cout << output.find(EARTH_Y)->second << endl;
+    //cout << output.find(FUEL_PORT)->second << endl;
+    //cout << output.find(SCORE_PORT)->second << endl;
+    PortMapping res;
+    res[SCENARIO_PORT] = 0;//Brain::scenarioNumber;
+//    static int g = 10000;
+    res[VX_PORT] = 0;
+ //   g -= 1000;
+    res[VY_PORT] = 0;
+    prevResult = res;
+    prevInput = output;
+    return res;
 }
 
 vector<pointF> B1::getShipsPositions() const{
-    static int cnt = 15;
+    pointF p(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
     vector<pointF> res;
-    res.push_back(pointF(10000000, 500000*cnt));
-    cnt--;
+    res.push_back(p);
     return res;
 }
 

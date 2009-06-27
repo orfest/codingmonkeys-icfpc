@@ -19,7 +19,7 @@ void SimulationWidget::setShipsNumber(int ships_number){
     }
 }
 
-void SimulationWidget::paintEvent(QPaintEvent* event){
+void SimulationWidget::paintEvent(QPaintEvent*){
     int wid = width();
     int hei = height();
     int smallest_dimension = qMin(wid,hei);

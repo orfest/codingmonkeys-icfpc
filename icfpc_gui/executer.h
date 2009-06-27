@@ -10,15 +10,17 @@
 
 class Executer{
 public:
-    Executer(const Config& config);
+    Executer(const Config& conf);
     virtual ~Executer();
     void run();
     bool nextStep();
     std::vector<pointF> getShipsPositions() const;
     int getShipsNumber() const;
     const PortMapping& getOutput() const { return output; }
+    const Config& getConfig() const { return config; }
 
 private:
+    Config config;
     VM* vm;
     Brain* brain;
     Tracer* tracer;

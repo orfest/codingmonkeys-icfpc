@@ -7,6 +7,10 @@
 #include <exception>
 #include <cmath>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <io.h>
+
 #include "instr.h"
 
 using namespace std;
@@ -14,6 +18,8 @@ using namespace std;
 bit_t bit(bool a){
     return a ? 1 : 0;
 }
+
+static const data_t MAGIC = -123456789.8742;
 
 VM::VM(const string& file) : status_register(0) {
     code_memory.resize(MEM_SIZE, Instr::getNoop());   
@@ -46,15 +52,17 @@ VM::VM(const string& file) : status_register(0) {
         data_memory[cnt] = data;
         code_memory[cnt] = op;
     }
+
+//    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stderr);
+//    cerr << "\n_\n";
 }
 
 PortMapping VM::step(const PortMapping& input){
     input_mapping = input;
     output_mapping.clear();
-    status_register = 0;        //!!TODO!! ???
-    for (addr_t program_counter_register = 0; program_counter_register < MEM_SIZE;){
+    for (addr_t program_counter_register = 0; program_counter_register < MEM_SIZE; program_counter_register++){
         bool store_result = true;
-        data_t res;
+        data_t res = MAGIC;
 
         code_t op = code_memory[program_counter_register];
         opcode_t opcode = Instr::getDOpcode(op);
@@ -64,7 +72,8 @@ PortMapping VM::step(const PortMapping& input){
             addr_t reg = Instr::getSReg(op);
 
             if (opcode == Instr::NOOP){
-                res = data_memory[program_counter_register];
+                store_result = false;
+                //res = data_memory[program_counter_register];
             } else if (opcode == Instr::CMPZ){
                 store_result = false;
                 data_t v = data_memory[program_counter_register];
@@ -130,14 +139,28 @@ PortMapping VM::step(const PortMapping& input){
             }
         }
         if (store_result){
+            if (res == MAGIC){
+                int i = 1;
+            }
             data_memory[program_counter_register] = res;
         }
-        program_counter_register++;
     }
+    //static int o = 1;
+    //if (o == 1){
+    //    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stdout);
+    //    o = 2;
+    //} else {
+    //    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stderr);
+    //    o = 1;
+    //}
+//    cerr << "\n_\n";
     return output_mapping;
 }
 
 data_t VM::do_input(addr_t reg){
+    if (input_mapping.find(reg) == input_mapping.end()){
+        throw exception("REG NOT FOUND!\n");
+    }
     return input_mapping[reg];
 }
 

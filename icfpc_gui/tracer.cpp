@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static const int TEAM_ID = 48;
+static const int TEAM_ID = 46;
 
 Tracer::Tracer(const string& file, int scenario_number) :
                 of(file.c_str(), ios_base::binary | ios_base::out | ios_base::trunc){
@@ -21,6 +21,7 @@ Tracer::Tracer(const string& file, int scenario_number) :
 void Tracer::add(const PortMapping& data, int timestep){
     PortMapping change;
     for (PortMapping::const_iterator it = data.begin(); it != data.end(); it++){
+        if (it->first == SCENARIO_PORT) continue;
         if (prev.find(it->first) == prev.end() || prev[it->first] != it->second){
             change[it->first] = it->second;
         }

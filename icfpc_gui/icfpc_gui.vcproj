@@ -42,6 +42,7 @@
 				PreprocessorDefinitions="UNICODE,WIN32,QT_THREAD_SUPPORT,QT_NO_DEBUG,NDEBUG,QT_CORE_LIB,QT_GUI_LIB"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="4"
 				DebugInformationFormat="0"
 			/>
 			<Tool
@@ -108,9 +109,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".\GeneratedFiles;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;.;.\..\vm;.\..\include;.\..\brain1;.\..\brain2;.\..\brain3;.\..\brain4"
-				PreprocessorDefinitions="UNICODE,WIN32,QT_THREAD_SUPPORT,QT_CORE_LIB,QT_GUI_LIB"
+				PreprocessorDefinitions="UNICODE,WIN32,QT_THREAD_SUPPORT,QT_CORE_LIB,QT_GUI_LIB;"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -235,7 +237,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputPath)..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; -DQT_CORE_LIB -DQT_GUI_LIB -DQT_THREAD_SUPPORT -DUNICODE -DWIN32 -I&quot;$(QTDIR)\include\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;.\.&quot; -I&quot;.\..\brain1\.&quot; -I&quot;.\..\brain2\.&quot; -I&quot;.\..\brain3\.&quot; -I&quot;.\..\brain4\.&quot; -I&quot;.\..\include\.&quot; -I&quot;.\..\vm\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;.\GeneratedFiles\.&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;   -DUNICODE -DWIN32 -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -D  -I&quot;.\GeneratedFiles\.&quot; -I&quot;$(QTDIR)\include\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;.\.&quot; -I&quot;.\..\vm\.&quot; -I&quot;.\..\include\.&quot; -I&quot;.\..\brain1\.&quot; -I&quot;.\..\brain2\.&quot; -I&quot;.\..\brain3\.&quot; -I&quot;.\..\brain4\.&quot; &quot;.\icfpc_gui.h&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
@@ -265,7 +267,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="Moc&apos;ing $(InputPath)..."
-						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; -DQT_CORE_LIB -DQT_GUI_LIB -DQT_THREAD_SUPPORT -DUNICODE -DWIN32 -I&quot;$(QTDIR)\include\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;.\.&quot; -I&quot;.\..\brain1\.&quot; -I&quot;.\..\brain2\.&quot; -I&quot;.\..\brain3\.&quot; -I&quot;.\..\brain4\.&quot; -I&quot;.\..\include\.&quot; -I&quot;.\..\vm\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;.\GeneratedFiles\.&quot;&#x0D;&#x0A;"
+						CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;   -DUNICODE -DWIN32 -DQT_THREAD_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB -D  -I&quot;.\GeneratedFiles\.&quot; -I&quot;$(QTDIR)\include\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;.\.&quot; -I&quot;.\..\vm\.&quot; -I&quot;.\..\include\.&quot; -I&quot;.\..\brain1\.&quot; -I&quot;.\..\brain2\.&quot; -I&quot;.\..\brain3\.&quot; -I&quot;.\..\brain4\.&quot; &quot;.\simulationwidget.h&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 						AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 						Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 					/>
@@ -326,25 +328,6 @@
 			SourceControlFiles="false"
 			>
 			<File
-				RelativePath=".\GeneratedFiles\Debug\moc_icfpc_gui.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\GeneratedFiles\Release\moc_icfpc_gui.cpp"
 				>
 				<FileConfiguration
@@ -364,7 +347,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\GeneratedFiles\Debug\moc_simulationwidget.cpp"
+				RelativePath=".\GeneratedFiles\Debug\moc_icfpc_gui.cpp"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
@@ -395,6 +378,25 @@
 				<FileConfiguration
 					Name="Debug|Win32"
 					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\GeneratedFiles\Debug\moc_simulationwidget.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
