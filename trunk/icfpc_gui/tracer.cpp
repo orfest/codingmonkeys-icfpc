@@ -45,7 +45,12 @@ void Tracer::add(const PortMapping& data, int timestep){
 
 void Tracer::dump(int timestep) {
     trace_data.push_back(timestep);
-    trace_data.push_back(0);
+    data_t to_store = 0;
+    data_t* ptr = &to_store;
+    void* vptr = static_cast<void*>(ptr);
+    uint32* uiptr = static_cast<uint32*>(vptr);
+    trace_data.push_back(uiptr[0]);
+    trace_data.push_back(uiptr[1]);
     of.write(reinterpret_cast<const char*>(&(trace_data[0])), trace_data.size() * sizeof(uint32));
     of.close();
 }
