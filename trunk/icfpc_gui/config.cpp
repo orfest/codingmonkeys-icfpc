@@ -11,21 +11,21 @@ bool Config::parse(int argc, char* argv[]){
         if (a.compare("--gui") == 0){
             gui = true;
             i++;
-        } else if (a.substr(0,2).compare("-i") == 0){
+        } else if (a.compare("-i") == 0){
             if (i >= argc - 1){
                 cerr << "Program path not specified\n";
                 return false;
             }
             program_file = argv[i+1];
             i += 2;
-        } else if (a.substr(0,2).compare("-o") == 0){
+        } else if (a.compare("-o") == 0){
             if (i >= argc - 1){
                 cerr << "Output path not specified\n";
                 return false;
             }
             trace_output = argv[i+1];
             i += 2;
-        } else if (a.substr(0,2).compare("-p") == 0){
+        } else if (a.compare("-p") == 0){
             if (i >= argc - 1){
                 cerr << "Problem type not specified\n";
                 return false;
@@ -36,19 +36,19 @@ bool Config::parse(int argc, char* argv[]){
                 return false;
             }
             i += 2;
-        } else if (a.substr(0,2).compare("-s") == 0){
+        } else if (a.compare("-s") == 0){
             if (i >= argc - 1){
                 cerr << "Scenario number not specified\n";
                 return false;
             }
             scenario_number = atoi(argv[i+1]);
             i += 2;
-        } else if (a.substr(0,2).compare("-l") == 0){
+        } else if (a.compare("-l") == 0){
             if (i >= argc - 1){
                 cerr << "Log file name not specified\n";
                 return false;
             }
-            log_file_name = atoi(argv[i+1]);
+            log_file_name = argv[i+1];
             i += 2;
         } else {
             cerr << "Warning: unknown option " << a << "\n";
