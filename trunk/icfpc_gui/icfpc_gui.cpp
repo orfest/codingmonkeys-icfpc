@@ -6,6 +6,7 @@
 #include <QTableWidgetItem>
 
 #include <map>
+#include <exception>
 
 #include "common.h"
 
@@ -33,12 +34,12 @@ icfpc_gui::~icfpc_gui() {
 }
 
 void icfpc_gui::next(){
-    for (int i = 0; i < 100; i++){
+    //for (int i = 0; i < 100; i++){
         if (!ex->nextStep()){
             timer->stop();
-            break;
+      //      break;
         }
-    }
+    //}
     
     std::vector<std::pair<double, double> > shipsPositions = ex->getShipsPositions();
     ui.space->addShipsPositions(shipsPositions);
@@ -70,12 +71,26 @@ void icfpc_gui::stop(){
 }
 
 void icfpc_gui::updateTable(){
-    table->clear();
-    table->setRowCount(ex->getOutput().size());
+    int rows = ex->getOutput().size() + 1; // + second number
+    if (table->rowCount() > rows){
+        throw std::exception("Number of rows decreases O__o");
+    }
     int cnt = 0;
     for (std::map<addr_t, data_t>::const_iterator it = ex->getOutput().begin(); it != ex->getOutput().end(); it++, cnt++){
         QTableWidgetItem* port = new QTableWidgetItem(QString("%1").arg(it->first));
         QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(it->second));
+        if (table->rowCount() <= cnt){
+            table->insertRow(cnt);
+        }
+        table->setItem(cnt, 0, port);
+        table->setItem(cnt, 1, value);
+    }
+    {
+        QTableWidgetItem* port = new QTableWidgetItem("Seconds");
+        QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(ex->getTimestep()));
+        if (table->rowCount() <= cnt){
+            table->insertRow(cnt);
+        }
         table->setItem(cnt, 0, port);
         table->setItem(cnt, 1, value);
     }
