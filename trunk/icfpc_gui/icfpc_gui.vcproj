@@ -196,6 +196,10 @@
 				RelativePath=".\tracer.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\vector.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -276,6 +280,10 @@
 			</File>
 			<File
 				RelativePath=".\tracer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vector.h"
 				>
 			</File>
 		</Filter>

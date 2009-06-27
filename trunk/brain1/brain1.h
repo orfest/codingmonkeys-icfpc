@@ -16,6 +16,10 @@ public:
 private:
     PortMapping prevResult;
     PortMapping prevInput;
+	double r1;
+	double r2;
+	double transferTime;
+	bool clockwise;
 };
 
 #endif //BRAIN1_H
