@@ -10,4 +10,6 @@ typedef code_t addr_t;
 
 typedef std::map<addr_t, data_t> PortMapping;
 
+typedef std::pair<data_t, data_t> pointF;
+
 #endif //COMMON_H
