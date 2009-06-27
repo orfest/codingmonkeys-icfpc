@@ -73,7 +73,7 @@ PortMapping B1::step(const PortMapping& output){
     prevResult = res;
     prevInput = output;
 	timestep++;
-    return res;
+    return fuelOveruseFailsafe(output, res);
 }
 
 vector<pointF> B1::getShipsPositions() const{
