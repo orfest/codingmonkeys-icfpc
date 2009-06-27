@@ -9,12 +9,17 @@
 class Ship{
     QVector<QPointF> track;
     QColor color;
+	int sweepedPointsUpTo;
+	int numSweeps;
 public:
+	Ship() : sweepedPointsUpTo(0), numSweeps(0) {}
     QColor getColor() const { return color; }
     const QVector<QPointF>& getTrack() const { return track; }
     void pushPosition(const QPointF& p);
     void setColor(QColor col) { color = col; }
 	const void reset() { track.clear(); }
+private:
+	void removeExcessTrackPoints(int maxPoints = 400);
 };
 
 #endif //SHIP_H
