@@ -10,7 +10,7 @@ class SimulationWidget : public QWidget{
     Q_OBJECT
 
     static const qreal EARTH_RADIUS;
-    static const qreal MIN_X_OR_Y;
+    static qreal MIN_X_OR_Y;
     static const int SHIP_SIZE = 8;
 
 public:
