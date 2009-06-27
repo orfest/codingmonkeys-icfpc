@@ -36,6 +36,13 @@ bool Config::parse(int argc, char* argv[]){
                 return false;
             }
             i += 2;
+        } else if (a.substr(0,2).compare("-s") == 0){
+            if (i >= argc - 1){
+                cerr << "Scenario number not specified\n";
+                return false;
+            }
+            scenario_number = atoi(argv[i+1]);
+            i += 2;
         } else {
             cerr << "Warning: unknown option " << a << "\n";
             i++;

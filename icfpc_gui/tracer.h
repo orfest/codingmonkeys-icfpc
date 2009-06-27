@@ -2,15 +2,18 @@
 #define TRACER_H
 
 #include <string>
-#include <vector>
+#include <fstream>
 
 #include "common.h"
 
 class Tracer{
 public:
-    Tracer(const std::string& file);
-    void add(const PortMapping& data);
-    void dump() const;
+    Tracer(const std::string& file, int scenario_number);
+    void add(const PortMapping& data, int timestep);
+    void dump(int timestep);
+private:
+    std::ofstream of;
+    PortMapping prev;
 };
 
 #endif //TRACER_H
