@@ -24,7 +24,12 @@ static const addr_t FUEL_PORT = 0x1;
 static const addr_t EARTH_X = 0x2;
 static const addr_t EARTH_Y = 0x3;
 
+//B1
 static const addr_t TARGET_RADIUS = 0x4;
+
+//B2
+static const addr_t TARGET_X = 0x4;
+static const addr_t TARGET_Y = 0x5;
 
 static const double GRAVITATIONAL_CONST = 6.67428e-11;
 static const double EARTH_MASS = 6.0e24;
