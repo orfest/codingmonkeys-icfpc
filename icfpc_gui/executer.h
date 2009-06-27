@@ -18,6 +18,7 @@ public:
     int getShipsNumber() const;
     const PortMapping& getOutput() const { return output; }
     const Config& getConfig() const { return config; }
+    int getTimestep() const { return timestep; }
 
 private:
     Config config;
