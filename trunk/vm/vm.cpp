@@ -60,9 +60,6 @@ PortMapping VM::step(const PortMapping& input){
     input_mapping = input;
     output_mapping.clear();
     for (addr_t program_counter_register = 0; program_counter_register < realCodeSize; program_counter_register++){
-        bool store_result = true;
-        data_t res = MAGIC;
-
         code_t op = code_memory[program_counter_register];
         opcode_t opcode = Instr::getDOpcode(op);
         if (opcode == Instr::S_TYPE_OP){

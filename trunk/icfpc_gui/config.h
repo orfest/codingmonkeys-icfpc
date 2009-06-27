@@ -11,7 +11,7 @@ struct Config{
     bool gui;
     int problem;
     int scenario_number;
-    Config():program_file("../download/bin1.obf"), trace_output("result.osf"), gui(false), problem(0), scenario_number(1002){}
+    Config():program_file("../download/bin1.obf"), trace_output("result.osf"), gui(false), problem(0), scenario_number(1001){}
     bool parse(int argc, char* argv[]);
 };
 
