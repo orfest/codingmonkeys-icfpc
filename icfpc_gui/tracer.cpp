@@ -15,7 +15,9 @@ Tracer::Tracer(const string& file, int scenario_number) :
         cerr << "Cannot create dump file\n";
         throw exception("Cannot create dump file");
     }
-    of << 0xCAFEBABE << TEAM_ID << scenario_number;
+    trace_data.push_back(0xCAFEBABE);
+    trace_data.push_back(TEAM_ID);
+    trace_data.push_back(scenario_number);
 }
 
 void Tracer::add(const PortMapping& data, int timestep){
@@ -27,14 +29,18 @@ void Tracer::add(const PortMapping& data, int timestep){
         }
     }
     if (change.size() == 0) return;
-    of << timestep << change.size();
+    trace_data.push_back(timestep);
+    trace_data.push_back(change.size());
     for (PortMapping::const_iterator it = change.begin(); it != change.end(); it++){
-        of << it->first << it->second;
+        trace_data.push_back(it->first);
+        trace_data.push_back(it->second);
         prev[it->first] = it->second;
     }
 }
 
 void Tracer::dump(int timestep) {
-    of << timestep << 0;
+    trace_data.push_back(timestep);
+    trace_data.push_back(0);
+    of.write(reinterpret_cast<const char*>(&(trace_data[0])), trace_data.size() * sizeof(uint32));
     of.close();
 }

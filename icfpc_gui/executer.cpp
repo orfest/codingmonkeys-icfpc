@@ -18,7 +18,7 @@ Executer::~Executer(){
 void Executer::run(){
     while (nextStep())
 				    	;
-    tracer->dump(timestep);
+    dump();
 }
 
 bool Executer::nextStep(){
@@ -27,6 +27,10 @@ bool Executer::nextStep(){
     tracer->add(input, timestep);
     timestep++;
     return !(brain->finished(output));
+}
+
+void Executer::dump(){
+    tracer->dump(timestep);
 }
 
 std::vector<pointF> Executer::getShipsPositions() const{

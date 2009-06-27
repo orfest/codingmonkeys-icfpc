@@ -34,12 +34,13 @@ icfpc_gui::~icfpc_gui() {
 }
 
 void icfpc_gui::next(){
-    //for (int i = 0; i < 100; i++){
+    for (int i = 0; i < 100; i++){
         if (!ex->nextStep()){
+            ex->dump();
             timer->stop();
-      //      break;
+            break;
         }
-    //}
+    }
     
     std::vector<std::pair<double, double> > shipsPositions = ex->getShipsPositions();
     ui.space->addShipsPositions(shipsPositions);

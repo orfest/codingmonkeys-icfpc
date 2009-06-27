@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "common.h"
 
@@ -11,9 +12,11 @@ public:
     Tracer(const std::string& file, int scenario_number);
     void add(const PortMapping& data, int timestep);
     void dump(int timestep);
+
 private:
     std::ofstream of;
     PortMapping prev;
+    std::vector<uint32> trace_data;
 };
 
 #endif //TRACER_H
