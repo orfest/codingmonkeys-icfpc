@@ -14,6 +14,7 @@ class VM{
 public:
     VM(const std::string& file);
     PortMapping step(const PortMapping& input);
+
 private:
     static const int NUM_ADDR_BITS = 14;
     static const int MEM_SIZE = (1 << NUM_ADDR_BITS);
@@ -28,8 +29,13 @@ private:
     data_t do_input(addr_t reg);
     void do_output(addr_t reg, data_t value);
 
+    void executeSOp(int counter);
+    void executeDOp(int counter);
+
     PortMapping input_mapping;
     PortMapping output_mapping;
+
+    int realCodeSize;
 };
 
 #endif //VM_H
