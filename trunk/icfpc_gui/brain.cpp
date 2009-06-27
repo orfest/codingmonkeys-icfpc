@@ -12,6 +12,10 @@
 Brain* Brain::getBrain(int problem, int scenarioNumber){
     if (problem == 0){
         return new B1(scenarioNumber);
+    } else if (problem == 1){
+        return new B2(scenarioNumber);
+    } else if (problem == 2){
+        return new B3(scenarioNumber);
     } else {
         throw new std::exception("Unknown problem type");
     }

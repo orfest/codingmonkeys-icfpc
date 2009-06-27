@@ -19,10 +19,7 @@ PortMapping B1::step(const PortMapping& output){
 	cout << output.find(TARGET_RADIUS)->second << endl;
 	cout << "------------" << endl;
 	//*/
-    /*if (output.find(SCORE_PORT)->second != 0){
-        cout << "!!!!!!!!!!" << timestep << "!!!!!!!\n";
-        fflush(stdout);
-    }*/
+
     PortMapping res;
 	res[SCENARIO_PORT] = 0;
     res[VX_PORT] = 0;
@@ -77,7 +74,7 @@ PortMapping B1::step(const PortMapping& output){
 }
 
 vector<pointF> B1::getShipsPositions() const{
-    pointF p(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+    pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
     return res;
