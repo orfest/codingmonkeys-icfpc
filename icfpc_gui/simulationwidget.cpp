@@ -6,7 +6,7 @@
 #include <math.h>
 
 const qreal SimulationWidget::EARTH_RADIUS = 6357000;
-qreal SimulationWidget::MIN_X_OR_Y = 6*EARTH_RADIUS;
+qreal SimulationWidget::MIN_X_OR_Y = 4*EARTH_RADIUS;
 
 SimulationWidget::SimulationWidget(QWidget* parent) : QWidget(parent){
 }
@@ -23,6 +23,14 @@ void SimulationWidget::setShipsNumber(int ships_number){
 void SimulationWidget::paintEvent(QPaintEvent*){
     int wid = width();
     int hei = height();
+
+	for (QVector<Ship>::const_iterator it = ships.begin(); it != ships.end(); it++){
+		for (int i = it->getTrack().size()-1; (i >= 0); i--){
+			QPointF p = it->getTrack()[i];
+			MIN_X_OR_Y = qMax(2.2*abs(p.x()),MIN_X_OR_Y);
+			MIN_X_OR_Y = qMax(2.2*abs(p.y()),MIN_X_OR_Y);
+		}
+	}
     int smallest_dimension = qMin(wid,hei);
     qreal meter_per_pixel = MIN_X_OR_Y / ((qreal)smallest_dimension);
     qreal earth = EARTH_RADIUS / meter_per_pixel;
@@ -38,7 +46,7 @@ void SimulationWidget::paintEvent(QPaintEvent*){
         QColor color(it->getColor());
 		qreal alpha;
 		qreal ship_paint_size;
-        for (int i = it->getTrack().size()-1; (i >= 0) && (it->getTrack().size() - i <= 1000); i--){
+        for (int i = it->getTrack().size()-1; (i >= 0); i--){
             painter.setBrush(QBrush(color));
             QPointF p = it->getTrack()[i];
             qreal px = mid_x + p.x() / meter_per_pixel;
