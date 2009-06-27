@@ -38,18 +38,17 @@ void SimulationWidget::paintEvent(QPaintEvent*){
         QColor color(it->getColor());
 		qreal alpha;
 		qreal ship_paint_size;
-        for (int i = it->getTrack().size()-1; i >= 0; i--){
-            v -= 5;
-            v = qMax(v,0);
-            color.setHsv(h,s,v);
+        for (int i = it->getTrack().size()-1; (i >= 0) && (it->getTrack().size() - i <= 1000); i--){
             painter.setBrush(QBrush(color));
             QPointF p = it->getTrack()[i];
             qreal px = mid_x + p.x() / meter_per_pixel;
             qreal py = mid_y + p.y() / meter_per_pixel;
 			alpha = 1.0/pow(it->getTrack().size()-i,0.25);
-			alpha = qMax(alpha,0.3);
 			ship_paint_size = alpha*SHIP_SIZE;
-			painter.drawEllipse(qRound(px-0.5*ship_paint_size), qRound(py-0.5*ship_paint_size), ship_paint_size, ship_paint_size);
+			if (ship_paint_size >= 2)
+				painter.drawEllipse(qRound(px-0.5*ship_paint_size), qRound(py-0.5*ship_paint_size), ship_paint_size, ship_paint_size);
+			else
+				painter.drawPoint(qRound(px), qRound(py));
         }
     }
 }
