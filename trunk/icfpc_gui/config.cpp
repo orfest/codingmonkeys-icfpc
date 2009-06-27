@@ -43,8 +43,15 @@ bool Config::parse(int argc, char* argv[]){
             }
             scenario_number = atoi(argv[i+1]);
             i += 2;
+        } else if (a.substr(0,2).compare("-l") == 0){
+            if (i >= argc - 1){
+                cerr << "Log file name not specified\n";
+                return false;
+            }
+            log_file_name = atoi(argv[i+1]);
+            i += 2;
         } else {
-//            cerr << "Warning: unknown option " << a << "\n";
+            cerr << "Warning: unknown option " << a << "\n";
             i++;
         }
     }
