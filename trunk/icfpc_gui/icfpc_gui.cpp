@@ -46,6 +46,7 @@ void icfpc_gui::next(){
 
     updateTable();
 
+	ui.space->update();
     update();
 }
 
@@ -108,4 +109,5 @@ void icfpc_gui::reset(){
     Executer* ex2 = new Executer(ex->getConfig());
     delete ex;
     ex = ex2;
+	ui.space->reset();
 }
