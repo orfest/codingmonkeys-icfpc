@@ -24,6 +24,7 @@ private:
     Tracer* tracer;
     PortMapping input;
     PortMapping output;
+    int timestep;
 };
 
 #endif //EXECUTER_H

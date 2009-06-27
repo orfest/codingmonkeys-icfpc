@@ -1,8 +1,8 @@
 #include "executer.h"
 
-Executer::Executer(const Config& config):vm(0),brain(0),tracer(0){
+Executer::Executer(const Config& config):vm(0),brain(0),tracer(0),timestep(0){
     vm = new VM(config.program_file);
-    tracer = new Tracer(config.trace_output);
+    tracer = new Tracer(config.trace_output, config.scenario_number);
     brain = Brain::getBrain(config.problem);
     input = brain->initialStep();
 }
@@ -15,13 +15,14 @@ Executer::~Executer(){
 
 void Executer::run(){
     while (nextStep());
-    tracer->dump();
+    tracer->dump(timestep);
 }
 
 bool Executer::nextStep(){
     output = vm->step(input);
     input = brain->step(output);
-    tracer->add(input);
+    tracer->add(input, timestep);
+    timestep++;
     return !(brain->finished());
 }
 
