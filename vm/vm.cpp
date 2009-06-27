@@ -16,7 +16,7 @@
 
 using namespace std;
 
-bit_t bit(bool a){
+inline bit_t bit(bool a){
     return a ? 1 : 0;
 }
 
@@ -39,7 +39,8 @@ VM::VM(const string& file) : status_register(0) {
     }
     is.seekg(0, ios::beg);
     char buf[framesize];
-    for (int cnt = 0; cnt < (length / framesize); cnt++){
+    realCodeSize = length / framesize;
+    for (int cnt = 0; cnt < realCodeSize; cnt++){
         is.read(buf, framesize);
         code_t op;
         data_t data;
@@ -53,109 +54,107 @@ VM::VM(const string& file) : status_register(0) {
         data_memory[cnt] = data;
         code_memory[cnt] = op;
     }
-
-//    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stderr);
-//    cerr << "\n_\n";
 }
 
 PortMapping VM::step(const PortMapping& input){
     input_mapping = input;
     output_mapping.clear();
-    for (addr_t program_counter_register = 0; program_counter_register < MEM_SIZE; program_counter_register++){
+    for (addr_t program_counter_register = 0; program_counter_register < realCodeSize; program_counter_register++){
         bool store_result = true;
         data_t res = MAGIC;
 
         code_t op = code_memory[program_counter_register];
         opcode_t opcode = Instr::getDOpcode(op);
         if (opcode == Instr::S_TYPE_OP){
-            opcode = Instr::getSOpcode(op);
-            int imm = Instr::getSImm(op);
-            addr_t reg = Instr::getSReg(op);
-
-            if (opcode == Instr::NOOP){
-                store_result = false;
-                //res = data_memory[program_counter_register];
-            } else if (opcode == Instr::CMPZ){
-                store_result = false;
-                data_t v = data_memory[reg];
-                opcode_t cmp_opcode = Instr::getCmpOpcode(op);
-                bit_t br;
-                if (cmp_opcode == Instr::LTZ){
-                    br = bit(v < 0);
-                } else if (cmp_opcode == Instr::LEZ){
-                    br = bit(v <= 0);
-                } else if (cmp_opcode == Instr::EQZ){
-                    br = bit(v == 0);
-                } else if (cmp_opcode == Instr::GEZ){
-                    br = bit(v >= 0);
-                } else if (cmp_opcode == Instr::GTZ){
-                    br = bit(v > 0);
-                } else {
-                    cerr << "Unknown CMPZ opcode!\n";
-                    throw exception("Unknown CMPZ opcode!");
-                }
-                status_register = br;
-            } else if (opcode == Instr::SQRT){
-                if (data_memory[reg] < 0){
-                    cerr << "Spec 1.5 says sqrt for negative values is undefined. Dying!\n";
-                    throw exception("sqrt for negative values");
-                }
-                res = sqrt(data_memory[reg]);
-            } else if (opcode == Instr::COPY){
-                res = data_memory[reg];
-            } else if (opcode == Instr::INPUT){
-                res = do_input(reg);
-            } else {
-                cerr << "Unknown S-Type opcode!\n";
-                throw exception("Unknown S-Type opcode!");
-            }
+            executeSOp(program_counter_register);
         } else {
-            addr_t reg1 = Instr::getDReg1(op);
-            addr_t reg2 = Instr::getDReg2(op);
-
-            if (opcode == Instr::ADD) {
-                res = data_memory[reg1] + data_memory[reg2];
-            } else if (opcode == Instr::SUB) {
-                res = data_memory[reg1] - data_memory[reg2];
-            } else if (opcode == Instr::MULT) {
-                res = data_memory[reg1] * data_memory[reg2];
-            } else if (opcode == Instr::DIV) {
-                if (data_memory[reg2] == 0.0){
-                    res = 0.0;
-                } else {
-                    res = data_memory[reg1] / data_memory[reg2];
-                }
-            } else if (opcode == Instr::OUTPUT) {
-                store_result = false;
-                do_output(reg1, data_memory[reg2]);
-            } else if (opcode == Instr::PHI) {
-                if (status_register == 1){
-                    res = data_memory[reg1];
-                } else {
-                    res = data_memory[reg2];
-                }
-            } else {
-                cerr << "Unknown D-Type opcode!\n";
-                throw exception("Unknown D-Type opcode!");
-            }
-        }
-        if (store_result){
-            if (res == MAGIC){
-                assert(false);
-            }
-            data_memory[program_counter_register] = res;
+            executeDOp(program_counter_register);
         }
     }
-    //static int o = 1;
-    //if (o == 1){
-    //    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stdout);
-    //    o = 2;
-    //} else {
-    //    fwrite(&(data_memory[0]), MEM_SIZE*sizeof(data_t),1 , stderr);
-    //    o = 1;
-    //}
-//    cerr << "\n_\n";
     return output_mapping;
+}
+
+void VM::executeSOp(int counter){
+    code_t op = code_memory[counter];
+    opcode_t opcode = Instr::getSOpcode(op);
+    addr_t reg = Instr::getSReg(op);
+
+    if (opcode == Instr::NOOP){
+        return;
+    } else if (opcode == Instr::CMPZ){
+        data_t v = data_memory[reg];
+        opcode_t cmp_opcode = Instr::getCmpOpcode(op);
+        bit_t br;
+        if (cmp_opcode == Instr::LTZ){
+            br = bit(v < 0);
+        } else if (cmp_opcode == Instr::LEZ){
+            br = bit(v <= 0);
+        } else if (cmp_opcode == Instr::EQZ){
+            br = bit(v == 0);
+        } else if (cmp_opcode == Instr::GEZ){
+            br = bit(v >= 0);
+        } else if (cmp_opcode == Instr::GTZ){
+            br = bit(v > 0);
+        } else {
+            cerr << "Unknown CMPZ opcode!\n";
+            throw exception("Unknown CMPZ opcode!");
+        }
+        status_register = br;
+    } else {
+        data_t res;
+        if (opcode == Instr::SQRT){
+            if (data_memory[reg] < 0){
+                cerr << "Spec 1.5 says sqrt for negative values is undefined. Dying!\n";
+                throw exception("sqrt for negative values");
+            }
+            res = sqrt(data_memory[reg]);
+        } else if (opcode == Instr::COPY){
+            res = data_memory[reg];
+        } else if (opcode == Instr::INPUT){
+            res = do_input(reg);
+        } else {
+            cerr << "Unknown S-Type opcode!\n";
+            throw exception("Unknown S-Type opcode!");
+        }
+        data_memory[counter] = res;
+    }
+}
+
+void VM::executeDOp(int counter){
+    code_t op = code_memory[counter];
+    opcode_t opcode = Instr::getDOpcode(op);
+    addr_t reg1 = Instr::getDReg1(op);
+    addr_t reg2 = Instr::getDReg2(op);
+
+    if (opcode == Instr::OUTPUT) {
+        do_output(reg1, data_memory[reg2]);
+        return;
+    } 
+
+    data_t res;
+    if (opcode == Instr::ADD) {
+        res = data_memory[reg1] + data_memory[reg2];
+    } else if (opcode == Instr::SUB) {
+        res = data_memory[reg1] - data_memory[reg2];
+    } else if (opcode == Instr::MULT) {
+        res = data_memory[reg1] * data_memory[reg2];
+    } else if (opcode == Instr::DIV) {
+        if (data_memory[reg2] == 0.0){
+            res = 0.0;
+        } else {
+            res = data_memory[reg1] / data_memory[reg2];
+        }
+    } else if (opcode == Instr::PHI) {
+        if (status_register == 1){
+            res = data_memory[reg1];
+        } else {
+            res = data_memory[reg2];
+        }
+    } else {
+        cerr << "Unknown D-Type opcode!\n";
+        throw exception("Unknown D-Type opcode!");
+    }
+    data_memory[counter] = res;
 }
 
 data_t VM::do_input(addr_t reg){
