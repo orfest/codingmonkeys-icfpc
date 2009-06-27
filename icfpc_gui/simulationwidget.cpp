@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QColor>
 #include <vector>
+#include <math.h>
 
 const qreal SimulationWidget::EARTH_RADIUS = 6357000;
 const qreal SimulationWidget::MIN_X_OR_Y = 6*EARTH_RADIUS;
@@ -24,26 +25,31 @@ void SimulationWidget::paintEvent(QPaintEvent*){
     int hei = height();
     int smallest_dimension = qMin(wid,hei);
     qreal meter_per_pixel = MIN_X_OR_Y / ((qreal)smallest_dimension);
-    int earth = qRound(2.0 * EARTH_RADIUS / meter_per_pixel);
-    int mid_x = qRound(wid*0.5);
-    int mid_y = qRound(hei*0.5);
+    qreal earth = EARTH_RADIUS / meter_per_pixel;
+    qreal mid_x = wid*0.5;
+    qreal mid_y = hei*0.5;
     QPainter painter(this);
     painter.setBrush(QBrush(Qt::blue));
-    painter.drawEllipse(qRound(mid_x-earth*0.5), qRound(mid_y-earth*0.5), earth, earth);
+    painter.drawEllipse(qRound(mid_x-earth), qRound(mid_y-earth), qRound(2.0*earth), qRound(2.0*earth));
 
     int h,s,v;
     for (QVector<Ship>::const_iterator it = ships.begin(); it != ships.end(); it++){
         it->getColor().getHsv(&h,&s,&v);
         QColor color(it->getColor());
+		qreal alpha;
+		qreal ship_paint_size;
         for (int i = it->getTrack().size()-1; i >= 0; i--){
             v -= 5;
             v = qMax(v,0);
             color.setHsv(h,s,v);
             painter.setBrush(QBrush(color));
             QPointF p = it->getTrack()[i];
-            int px = mid_x + qRound(p.x() / meter_per_pixel);
-            int py = mid_y + qRound(p.y() / meter_per_pixel);
-            painter.drawEllipse(qRound(px-0.5*SHIP_SIZE), qRound(py-0.5*SHIP_SIZE), SHIP_SIZE, SHIP_SIZE);
+            qreal px = mid_x + p.x() / meter_per_pixel;
+            qreal py = mid_y + p.y() / meter_per_pixel;
+			alpha = 1.0/pow(it->getTrack().size()-i,0.25);
+			alpha = qMax(alpha,0.3);
+			ship_paint_size = alpha*SHIP_SIZE;
+			painter.drawEllipse(qRound(px-0.5*ship_paint_size), qRound(py-0.5*ship_paint_size), ship_paint_size, ship_paint_size);
         }
     }
 }
@@ -53,4 +59,10 @@ void SimulationWidget::addShipsPositions(const std::vector<std::pair<double,doub
     for (QVector<Ship>::iterator it = ships.begin(); it != ships.end(); it++, pt++){
         it->pushPosition(QPointF(pt->first, pt->second));
     }
+}
+
+void SimulationWidget::reset(){
+	 for (QVector<Ship>::iterator it = ships.begin(); it != ships.end(); it++){
+		it->reset();
+	 }
 }
