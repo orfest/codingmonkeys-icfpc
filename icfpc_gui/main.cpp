@@ -15,7 +15,8 @@ int main(int argc, char *argv[]) {
     if (!config.parse(argc, argv)){
         return -1;
     }
-    freopen(config.log_file_name.c_str(),"a",stdout);
+
+    freopen(config.log_file_name.c_str(), "a", stdout);
     Executer* ex = new Executer(config);
     if (!config.gui){
         ex->run();
