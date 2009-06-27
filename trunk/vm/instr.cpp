@@ -1,7 +1,8 @@
 #include "instr.h"
 
 code_t Instr::getNoop(){
-    return buildSInstr(NOOP, 0, 0);
+    return 0;
+    //return buildSInstr(NOOP, 0, 0);
 }
 
 code_t Instr::buildSInstr(opcode_t opcode, int imm, addr_t src){

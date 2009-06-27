@@ -16,7 +16,9 @@ icfpc_gui::icfpc_gui(Executer* ex_, QWidget *parent, Qt::WFlags flags)
     timer = new QTimer(this);
     updateTimeout(0);
     connect(ui.action_Start, SIGNAL(triggered()), this, SLOT(start()));
+    connect(ui.actionPause, SIGNAL(triggered()), this, SLOT(pause()));
     connect(ui.actionS_top, SIGNAL(triggered()), this, SLOT(stop()));
+
     connect(ui.timeoutSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateTimeout(int)));
 
     QStringList headers;
@@ -31,8 +33,11 @@ icfpc_gui::~icfpc_gui() {
 }
 
 void icfpc_gui::next(){
-    if (!ex->nextStep()){
-        timer->stop();
+    for (int i = 0; i < 100; i++){
+        if (!ex->nextStep()){
+            timer->stop();
+            break;
+        }
     }
     
     std::vector<std::pair<double, double> > shipsPositions = ex->getShipsPositions();
@@ -44,8 +49,19 @@ void icfpc_gui::next(){
 }
 
 void icfpc_gui::start(){
+    reset();
     connect(timer, SIGNAL(timeout()), this, SLOT(next()));
     timer->start(timeout);
+}
+
+void icfpc_gui::pause(){
+    if (timer->isActive()){
+        timer->stop();
+        disconnect(timer, SIGNAL(timeout()), this, SLOT(next()));
+    } else {
+        connect(timer, SIGNAL(timeout()), this, SLOT(next()));
+        timer->start(timeout);
+    }
 }
 
 void icfpc_gui::stop(){
@@ -65,10 +81,16 @@ void icfpc_gui::updateTable(){
     }
 }
 
-void icfpc_gui::updateTimeout(int t){
+void icfpc_gui::updateTimeout(int){
     timeout = ui.timeoutSpinBox->value();
     if (timer->isActive()){
         timer->stop();
         timer->start(timeout);
     }
+}
+
+void icfpc_gui::reset(){
+    Executer* ex2 = new Executer(ex->getConfig());
+    delete ex;
+    ex = ex2;
 }

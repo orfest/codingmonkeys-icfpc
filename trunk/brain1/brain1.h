@@ -7,12 +7,15 @@
 
 class B1 : public Brain{
 public:
-    B1(){}
-    virtual PortMapping initialStep();
+    B1(int scenarioNumber);
     virtual PortMapping step(const PortMapping& output);
-    virtual bool finished() const;
+
     virtual std::vector<pointF> getShipsPositions() const;
     virtual int getShipsNumber() const;
+
+private:
+    PortMapping prevResult;
+    PortMapping prevInput;
 };
 
 #endif //BRAIN1_H

@@ -13,6 +13,7 @@ class icfpc_gui : public QMainWindow {
 
 public slots:
     void start();
+    void pause();
     void stop();
 
 public:
@@ -30,6 +31,7 @@ private:
     Executer* ex;
     QTableWidget* table;
     void updateTable();
+    void reset();
 };
 
 #endif // ICFPC_GUI_H

@@ -528,6 +528,7 @@
    </attribute>
    <addaction name="action_Open" />
    <addaction name="action_Start" />
+   <addaction name="actionPause" />
    <addaction name="actionS_top" />
   </widget>
   <widget class="QStatusBar" name="statusBar" />
@@ -554,6 +555,11 @@
   <action name="actionS_top" >
    <property name="text" >
     <string>S&amp;top</string>
+   </property>
+  </action>
+  <action name="actionPause" >
+   <property name="text" >
+    <string>Pause</string>
    </property>
   </action>
  </widget>

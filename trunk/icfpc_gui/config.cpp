@@ -44,7 +44,7 @@ bool Config::parse(int argc, char* argv[]){
             scenario_number = atoi(argv[i+1]);
             i += 2;
         } else {
-            cerr << "Warning: unknown option " << a << "\n";
+//            cerr << "Warning: unknown option " << a << "\n";
             i++;
         }
     }
