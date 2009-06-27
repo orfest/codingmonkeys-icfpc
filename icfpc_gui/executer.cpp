@@ -4,9 +4,6 @@ Executer::Executer(const Config& conf):config(conf),vm(0),brain(0),tracer(0),tim
     vm = new VM(config.program_file);
     tracer = new Tracer(config.trace_output, config.scenario_number);
     brain = Brain::getBrain(config.problem, config.scenario_number);
-    input[SCENARIO_PORT] = config.scenario_number;
-    input[VX_PORT] = 0;
-    input[VY_PORT] = 0;
 }
 
 Executer::~Executer(){
@@ -18,19 +15,18 @@ Executer::~Executer(){
 void Executer::run(){
     while (nextStep())
 				    	;
-    dump();
 }
 
 bool Executer::nextStep(){
-    output = vm->step(input);
-    input = brain->step(output);
+    input = brain->step(output);        //at the very first invokation output should be empty
     tracer->add(input, timestep);
+    output = vm->step(input);
     timestep++;
-    return !(brain->finished(output));
-}
-
-void Executer::dump(){
-    tracer->dump(timestep);
+    if (brain->finished(output)){
+        tracer->dump(timestep);
+        return false;
+    }
+    return true;
 }
 
 std::vector<pointF> Executer::getShipsPositions() const{

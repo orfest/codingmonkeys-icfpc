@@ -19,19 +19,27 @@ PortMapping B1::step(const PortMapping& output){
 	cout << output.find(TARGET_RADIUS)->second << endl;
 	cout << "------------" << endl;
 	//*/
-	static int step = 0;
-	if (step == 0) {
-		r1 = sqrt(pow(output.find(EARTH_X)->second, 2) + pow(output.find(EARTH_Y)->second, 2));
-		r2 = output.find(TARGET_RADIUS)->second;
-		transferTime = M_PI * sqrt(pow(r1 + r2, 3) / (8 * MU_CONST));
-	}
-
+    /*if (output.find(SCORE_PORT)->second != 0){
+        cout << "!!!!!!!!!!" << timestep << "!!!!!!!\n";
+        fflush(stdout);
+    }*/
     PortMapping res;
 	res[SCENARIO_PORT] = 0;
     res[VX_PORT] = 0;
 	res[VY_PORT] = 0;
 
-	if (step == 1) {
+    if (timestep == 0){
+        assert(output.empty());
+        res[SCENARIO_PORT] = Brain::scenarioNumber;
+    }
+
+    if (timestep == 1) {
+		r1 = sqrt(pow(output.find(EARTH_X)->second, 2) + pow(output.find(EARTH_Y)->second, 2));
+		r2 = output.find(TARGET_RADIUS)->second;
+		transferTime = M_PI * sqrt(pow(r1 + r2, 3) / (8 * MU_CONST));
+	}
+
+	if (timestep == 2) {
 		double delta_v1 = sqrt(MU_CONST / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
 		Vector prevEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 		Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
@@ -47,8 +55,8 @@ PortMapping B1::step(const PortMapping& output){
 		res[VY_PORT] = delta.y;
 	}
 
-	if (step == ceil(1 + transferTime)) {
-		assert(ceil(1 + transferTime) > 1);
+	if (timestep == ceil(2 + transferTime)) {
+		assert(ceil(2 + transferTime) > 1);
 
 		double delta_v2 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));
 		Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
@@ -64,7 +72,7 @@ PortMapping B1::step(const PortMapping& output){
 
     prevResult = res;
     prevInput = output;
-	step++;
+	timestep++;
     return res;
 }
 

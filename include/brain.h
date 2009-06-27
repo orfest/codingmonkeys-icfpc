@@ -15,8 +15,9 @@ public:
     virtual int getShipsNumber() const = 0;
 
 protected:
-    Brain(int sn):scenarioNumber(sn){}
+    Brain(int sn):scenarioNumber(sn),timestep(0){}
     int scenarioNumber;
+    int timestep;
 };
 
 #endif //BRAIN_H
