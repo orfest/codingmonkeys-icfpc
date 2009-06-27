@@ -33,7 +33,12 @@ void Tracer::add(const PortMapping& data, int timestep){
     trace_data.push_back(change.size());
     for (PortMapping::const_iterator it = change.begin(); it != change.end(); it++){
         trace_data.push_back(it->first);
-        trace_data.push_back(it->second);
+        data_t to_store = it->second;
+        data_t* ptr = &to_store;
+        void* vptr = static_cast<void*>(ptr);
+        uint32* uiptr = static_cast<uint32*>(vptr);
+        trace_data.push_back(uiptr[0]);
+        trace_data.push_back(uiptr[1]);
         prev[it->first] = it->second;
     }
 }
