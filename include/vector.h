@@ -1,6 +1,8 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include "common.h"
+
 class Vector {
 public:
 	double x;
@@ -8,6 +10,9 @@ public:
 
 	Vector(double x = 0.0, double y = 0.0);
 	Vector(const Vector & vec);
+	Vector(const pointF & pnt) : x(pnt.first), y(pnt.second) {};
+
+	operator pointF() const { return pointF(x, y); };
 	
 	double operator[](int ind) const;
 	double & operator[](int ind);

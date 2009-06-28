@@ -19,10 +19,10 @@ Brain* Brain::getBrain(int problem, int scenarioNumber){
         return new B1(scenarioNumber);
 	} else if (problem == 1) {
         return new B2_2(scenarioNumber);
-    /*} else if (problem == 2) {
+    } else if (problem == 2) {
         return new B3(scenarioNumber);
     } else if (problem == 3) {
-        return new B4(scenarioNumber);*/
+        return new B4(scenarioNumber);
     } else {
         throw new std::exception("Unknown problem type");
     }
@@ -61,6 +61,10 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 PortMapping Brain::step(const PortMapping& output)
 {
+	// hack for Brain3 implementation and Brain4 stub !!!
+	if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4)
+		return _step(output);
+
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
 	res[VX_PORT] = 0;

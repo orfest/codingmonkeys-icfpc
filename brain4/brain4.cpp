@@ -10,7 +10,7 @@ using namespace std;
 
 B4::B4(int sn):Brain(sn) {}
 
-PortMapping B4::step(const PortMapping& output){
+PortMapping B4::_step(const PortMapping& output){
 	/** /
     cout << output.find(EARTH_X)->second << endl;
     cout << output.find(EARTH_Y)->second << endl;
