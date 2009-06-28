@@ -5,6 +5,7 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QWheelEvent>
+#include <QCloseEvent>
 
 #include <map>
 #include <exception>
@@ -33,7 +34,7 @@ icfpc_gui::icfpc_gui(Executer* ex_, QWidget *parent, Qt::WFlags flags)
 }
 
 icfpc_gui::~icfpc_gui() {
-    delete timer;
+    delete timer; timer = 0;
 }
 
 void icfpc_gui::next(){
@@ -125,3 +126,8 @@ void icfpc_gui::wheelEvent(QWheelEvent* event){
      ui.zoomSlider->setValue(ui.zoomSlider->value() + numSteps);
      QWidget::wheelEvent(event);
 }
+
+void icfpc_gui::closeEvent(QCloseEvent*){
+    qApp->exit(0);
+}
+
