@@ -8,7 +8,7 @@ using namespace std;
 
 static const double EPS = 0.1;
 
-B3::B3(int sn):Brain(sn) {}
+B3::B3(int sn, VM* vm):Brain(sn, vm){}
 
 PortMapping B3::_step(const PortMapping& output) {
 	/** /
@@ -201,11 +201,12 @@ PortMapping B3::_step(const PortMapping& output) {
     return fuelOveruseFailsafe(output, res);
 }
 
-vector<pointF> B3::getShipsPositions() const {
-    pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
+
+vector<pointF> B3::getShipsPositions(const PortMapping& output) const {
+    pointF p(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
-    pointF target( p.first + prevInput.find(TARGET_X)->second, p.second + prevInput.find(TARGET_Y)->second   );
+    pointF target( p.first + output.find(TARGET_X)->second, p.second + output.find(TARGET_Y)->second   );
     res.push_back(target);
 	
 	double alpha = (timestep % 2000) / 2000.0;

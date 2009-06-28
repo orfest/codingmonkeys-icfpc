@@ -9,7 +9,7 @@
 
 using namespace std;
 
-B1::B1(int sn):Brain(sn),step(0) {}
+B1::B1(int sn, VM* vm):Brain(sn, vm),step(0) {}
 
 PortMapping B1::_step(const PortMapping& output){
     PortMapping res;
@@ -32,8 +32,8 @@ PortMapping B1::_step(const PortMapping& output){
 	return res;
 }
 
-vector<pointF> B1::getShipsPositions() const{
-    pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
+vector<pointF> B1::getShipsPositions(const PortMapping& output) const{
+    pointF p(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
     return res;
