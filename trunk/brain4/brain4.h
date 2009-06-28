@@ -16,8 +16,6 @@ public:
     virtual int getShipsNumber() const;
 
 private:
-    PortMapping prevResult;
-    PortMapping prevInput;
 	double r1;
 	double r2;
 	double transferTime;
