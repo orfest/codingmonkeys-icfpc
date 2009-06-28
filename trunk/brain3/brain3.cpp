@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static const double EPS = 0.1;
+static const double EPS = 5000.0;
 
 B3::B3(int sn, VM* vm):Brain(sn, vm){}
 
@@ -65,17 +65,14 @@ PortMapping B3::_step(const PortMapping& output) {
 		Vector tangentTarg(curTargEarth.y, -curTargEarth.x);
 		targClockwise = ( Vector::dotProduct(curTargVel, tangentTarg) > 0.0 );
 
-#if 0
+#if 1
 		// now we can estimate orbits
 		// note that this is used *instead* of actual measuring and automatically bypasses it
-		// though for now it is buggy
-		//Vector myAphelion, myPerihelion;
 		estimateOrbit(curMyVel, -startMeEarth, myAphelion, myPerihelion);
 		rFromMin = myAphelion.length();
 		rFromMax = myPerihelion.length();
 		rFromKnown = true;
 
-		//Vector targAphelion, targPerihelion;
 		estimateOrbit(curTargVel, -startTargEarth, targAphelion, targPerihelion);
 		rToMin = targPerihelion.length();
 		rToMax = targPerihelion.length();
@@ -85,7 +82,7 @@ PortMapping B3::_step(const PortMapping& output) {
 		state = waitingJumpFrom;
 #endif	
 
-#if 1
+#if 0
 		// use VM to simulate orbiting and measure orbits
 		simulateAndGetOrbits();
 		myAphelion = orbits[0].minR;
@@ -133,26 +130,30 @@ PortMapping B3::_step(const PortMapping& output) {
 			state = waitingJumpFrom;
 	}
 
-	if (state == waitingJumpFrom && abs(rFromMax - curMeEarth.length()) < 10 * EPS) {
+	if (state == waitingJumpFrom && isPhaseWithinEpsCircleAware(-curMeEarth, myPerihelion, myAphelion)) {
+		// !!! && abs(rFromMax - curMeEarth.length()) < 1000 * EPS) {
 		// jump to circular orbit (rFromMax), and immediately to target circular orbit (rToMax)
 		// this effectively transfers to elliptic orbit (rFromMax, rToMax)
 		hohmannTransfer(res, rFromMin, rFromMax, true, curMeEarth);
 		hohmannTransfer(res, rFromMax, rToMax, false, curMeEarth);
 
+		jumpFromCircPos = -curMeEarth;
 		state = jumpedFromCircular;
 	}
 
-	if (state == jumpedFromCircular && abs(rToMax - curMeEarth.length()) < 100 * EPS) {
+	if (state == jumpedFromCircular && isPhaseWithinEpsCircleAware(-curMeEarth, -jumpFromCircPos, Vector() )) {
+		// !!! && abs(rToMax - curMeEarth.length()) < 1000 * EPS) {
 		// transfer to circular (rToMax)
 		hohmannTransfer(res, rFromMax, rToMax, true, curMeEarth);
 
 		state = waitingJumpTo;
 	}
 
-	if (state == waitingJumpTo && (curMeEarth - rToMaxTargEarth).length() < 50000 * EPS) {
+	if (state == waitingJumpTo && isPhaseWithinEpsCircleAware(-curMeEarth, targPerihelion, targAphelion)) {
+		// !!! && (curMeEarth - rToMaxTargEarth).length() < 50000 * EPS) {
 		// transfer to elliptic (rToMin, rToMax)
 		hohmannTransfer(res, rToMax, rToMin, false, curMeEarth);
-
+#if 1
 		if (clockwise == targClockwise) {	// flip direction
 			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 			Vector curMyVel = prevMeEarth - curMeEarth;
@@ -163,11 +164,12 @@ PortMapping B3::_step(const PortMapping& output) {
 			res[VY_PORT] = deltaV.y;
 			clockwise = !clockwise;
 		}
+#endif
 
 		state = countering;
 	}
 
-	if (state == countering && (curMeEarth - curTargEarth).length() < 50000 * EPS) {
+	if (state == countering && (curMeEarth - curTargEarth).length() < 20000) {
 		// flip direction
 		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 		Vector curMyVel = prevMeEarth - curMeEarth;
@@ -260,63 +262,4 @@ void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR,
 	Vector delta = tangent * delta_v;
 	actuators[VX_PORT] += delta.x;
 	actuators[VY_PORT] += delta.y;
-}
-
-void B3::estimateOrbit(const Vector & velocity, const Vector & position, 
-										Vector & aphelionPos, Vector & perihelionPos) const {
-	assert(velocity.length() > 1e-3);
-	assert(position.length() > 1e-3);
-	assert(Vector::dotProduct(velocity, position) < 1e-5);
-
-	double r = position.length();
-	double energy = velocity.sqLength() / 2 - MU_CONST / r;
-	double sMjAxis = - MU_CONST / (2 * energy);
-	double l = Vector::crossProduct(position, velocity);
-	double alpha = l * l / MU_CONST;
-	double sMnAxis = sqrt(alpha * sMjAxis);
-	double sqEccent = 1 - pow(sMnAxis / sMjAxis, 2);
-	double eccentricity = sqrt(sqEccent);
-
-	if (position.length() < sMjAxis) {
-		aphelionPos = position;
-		perihelionPos = -Vector(position).normalize() * ((1 + eccentricity) * sMjAxis);
-	} else {
-		aphelionPos = -Vector(position).normalize() * ((1 - eccentricity) * sMjAxis);
-		perihelionPos = position;
-	}
-
-
-#if 0	// this is old code that is broken, but may be useful some time
-	double alphaR = 1 - alpha / r;
-	if (abs(alphaR) < 1e-5) {	// this is circle
-		aphelionPos = position;
-		perihelionPos = -position;
-		return;
-	}
-
-	double sqCosThetas = 1 / (velocity.sqLength() * pow( (2 * r - alpha) / (l * alphaR), 2.0 ) + 1);
-	double cosThetas = sqrt(sqCosThetas);
-	double eccentricity = - alphaR / cosThetas;
-	assert(eccentricity >= 0.0 && eccentricity <= 1.0);
-	double focusToCenter = eccentricity * sMjAxis;
-
-	double sqEccent2 = velocity.sqLength() * pow(alpha / l, 2) + pow(alphaR, 2);
-	assert(abs(sqrt(sqEccent2) - eccentricity) < 0.0001);
-	//double cosThetas2 = - alphaR / sqrt(sqEccent2);
-	double sinThetas2 = velocity.length() * (1 - alphaR) * r / (sqrt(sqEccent2) * l);
-
-	// TODO check if this is correct in all cases (signs) ?
-	double thetas = acos(cosThetas);
-	double theta = getPolarAngle(position);
-	double theta0 = theta - (sinThetas2 < 0 ? -1 : 1) * thetas;
-
-	Vector dirToCenter = getVectorFromPolarAngle(theta0);
-	Vector center = dirToCenter * focusToCenter;
-	perihelionPos = center + dirToCenter * sMjAxis;
-	aphelionPos = center - dirToCenter * sMjAxis;
-#endif
-}
-
-Vector B3::getVectorFromPolarAngle(double angle) const {
-	return Vector(cos(angle), sin(angle));
 }
