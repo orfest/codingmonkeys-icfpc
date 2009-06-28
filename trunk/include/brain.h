@@ -38,6 +38,7 @@ protected:
     VM* vm;
     std::vector<Orbit> orbits;
     void simulateAndGetOrbits();
+    bool isClockwise(const Vector& newPosition, const Vector& prevPosition) const;
 
 	PortMapping & fuelOveruseFailsafe(const PortMapping & sensors, PortMapping & actuators);
 };
