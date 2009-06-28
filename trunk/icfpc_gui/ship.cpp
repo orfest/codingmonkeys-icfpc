@@ -3,7 +3,7 @@
 
 void Ship::pushPosition(const QPointF& p){
     track.push_back(p);
-	removeExcessTrackPoints();
+	removeExcessTrackPoints(maxPointsPerShip);
 }
 
 void Ship::removeExcessTrackPoints(int maxPoints) {

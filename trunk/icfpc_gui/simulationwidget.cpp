@@ -13,10 +13,12 @@ SimulationWidget::SimulationWidget(QWidget* parent) : QWidget(parent){
 
 void SimulationWidget::setShipsNumber(int ships_number){
     ships.resize(ships_number);
+	int pointsPerTrack = TOTAL_MAX_POINTS / ships_number;
     for (int i = 0; i < ships.size(); i++){
         QColor color;
         color.setHsv(255 * i / ships.size(), 230, 230);
         ships[i].setColor(color);
+		ships[i].setMaxPoints(pointsPerTrack);
     }
 }
 
