@@ -31,6 +31,7 @@ icfpc_gui::icfpc_gui(Executer* ex_, QWidget *parent, Qt::WFlags flags)
     table = new QTableWidget(0,2,0); //rows, columns, parent
     table->setHorizontalHeaderLabels(headers);
     table->show();
+    start();
 }
 
 icfpc_gui::~icfpc_gui() {
@@ -123,7 +124,7 @@ void icfpc_gui::wheelEvent(QWheelEvent* event){
      if (numDegrees < 0) {
          numSteps = -numSteps;
      }
-     ui.zoomSlider->setValue(ui.zoomSlider->value() + numSteps);
+     ui.zoomSlider->setValue(ui.zoomSlider->value() - numSteps);
      QWidget::wheelEvent(event);
 }
 
