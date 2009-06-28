@@ -12,6 +12,7 @@ class SimulationWidget : public QWidget{
     static const qreal EARTH_RADIUS;
     static qreal MIN_X_OR_Y;
     static const int SHIP_SIZE = 8;
+	static const int TOTAL_MAX_POINTS = 2000;
 
 public:
     SimulationWidget(QWidget* parent = 0);
