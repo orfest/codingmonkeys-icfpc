@@ -65,7 +65,6 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 
 PortMapping Brain::step(const PortMapping& output) {
-    simulateAndGetOrbits();
 	// hack for Brain3 implementation and Brain4 stub !!!
     if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
 		return _step(output);
@@ -118,12 +117,10 @@ void Brain::simulateAndGetOrbits(){
 
     int numShips = this->getShipsNumber();
     orbits.resize(numShips);
-    vector<int> wasMax(numShips, 0);
-    vector<int> wasMin(numShips, 0);
-    vector<double> curDistance(numShips, -1);
-    vector<double> prevDistance(numShips, -1);
-    vector<Vector> curPos(numShips);
-    vector<Vector> prevPos(numShips);
+    vector<double> maxDist(numShips, -1e20);
+    vector<double> minDist(numShips, 1e20);
+    vector<int> maxDistTime(numShips, -1);
+    vector<int> minDistTime(numShips, -1);
     vector<int> done(numShips, 0);
 
     int toexamine = numShips;
@@ -138,36 +135,31 @@ void Brain::simulateAndGetOrbits(){
             if (done[i]) continue;
             Vector pos(shipsPositions[i].first, shipsPositions[i].second);
             double dist = pos.length();
-            if (dist > 2){
-                if (dist < curDistance[i] && curDistance[i] > prevDistance[i]){
-                    assert(!wasMax[i]);
-                    wasMax[i] = 1;
-                    orbits[i].maxR = curPos[i];
-                    if (wasMin[i]){
-                        assert(!done[i]);
-                        done[i] = 1;
-                        toexamine--;
-                    }
-                }
-                if (dist > curDistance[i] && curDistance[i] < prevDistance[i]){
-                    assert(!wasMin[i]);
-                    wasMin[i] = 1;
-                    orbits[i].minR = curPos[i];
-                    if (wasMax[i]){
-                        assert(!done[i]);
-                        done[i] = 1;
-                        toexamine--;
-                    }
-                }
+            if (dist > maxDist[i]){
+                maxDist[i] = dist;
+                maxDistTime[i] = t;
             }
-            prevDistance[i] = curDistance[i];
-            curDistance[i] = dist;
-            prevPos[i] = curPos[i];
-            curPos[i] = pos;
+            if (dist < minDist[i]){
+                minDist[i] = dist;
+                minDistTime[i] = t;
+            }
+            if (minDistTime[i] >= 0 && maxDistTime[i] >= 0 && 
+                    (t - max(minDistTime[i],maxDistTime[i])) > 2*(abs(maxDistTime[i] - minDistTime[i])))  {
+                done[i] = 1;
+                toexamine--;
+            }
         }
         if (t == 0){
             res[SCENARIO_PORT] = 0;
         }
     }
     int i = 1;
+}
+
+bool Brain::isClockwise(const Vector& newPosition, const Vector& prevPosition) const{
+    Vector move(newPosition-prevPosition);
+    
+    Vector tangent(newPosition.y, -newPosition.x);      // turned 90 clockwise
+	bool clockwise = ( Vector::dotProduct(move, tangent) > 0.0 );
+    return clockwise;
 }
