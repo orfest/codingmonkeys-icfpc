@@ -44,9 +44,9 @@ PortMapping B3_3::_step(const PortMapping& output){
 	} else if (step == 1) {
 		//double alp = 7291.5;//estimateTimeToPerihelion(target);
 		Orbit target;
-		target.minR = orbits[1].minR;
-		target.maxR = orbits[0].minR;
-		double alp = -6690;
+		target.minR = orbits[0].minR;
+		target.maxR = orbits[1].minR;
+		double alp = -6685;
 		double r0 = sqrt(pow(target.maxR.x,2) + pow(target.maxR.y,2));
 		double r1 = sqrt(pow(orbits[1].maxR.x,2) + pow(orbits[1].maxR.y,2));
 		double rt = pow( MU_CONST*pow(alp/(2.0*M_PI),2.0) ,1.0/3) - r0;
