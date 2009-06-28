@@ -150,6 +150,34 @@ PortMapping FreeFly::step(const PortMapping& output){
 	return res;
 }
 
+PortMapping FlipDirection::step(const PortMapping& output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+    if (timestep == 0){
+        state = RUNNING;
+        prev = Vector(
+            -output.find(EARTH_X)->second,
+            -output.find(EARTH_Y)->second
+            );
+    } else {
+        Vector cur(
+            -output.find(EARTH_X)->second,
+            -output.find(EARTH_Y)->second
+            );
+        Vector move(cur);
+        move -= prev;
+	    res[VX_PORT] = -2*move.x;
+    	res[VY_PORT] = -2*move.y;
+        state = COMPLETE;
+    }
+
+	timestep++;
+	return res;
+}
+
 PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;

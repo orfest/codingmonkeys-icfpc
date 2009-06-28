@@ -16,7 +16,8 @@ struct Orbit{
 enum OPERATION{
 	INITIALIZATION,
 	HOHMAN_ORBIT_TRANSFER,
-	BI_ELLIPTIC_TRANSFER
+	BI_ELLIPTIC_TRANSFER,
+    FLIP_DIRECTION
 };
 
 enum STATE{
@@ -67,6 +68,13 @@ public:
 	virtual PortMapping step(const PortMapping& output);
 
 	double transferTime;
+};
+
+class FlipDirection : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+private:
+    Vector prev;
 };
 
 
