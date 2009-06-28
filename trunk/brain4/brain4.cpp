@@ -8,7 +8,7 @@
 
 using namespace std;
 
-B4::B4(int sn):Brain(sn) {}
+B4::B4(int sn, VM* vm):Brain(sn, vm) {}
 
 PortMapping B4::_step(const PortMapping& output){
 	/** /
@@ -36,19 +36,19 @@ PortMapping B4::_step(const PortMapping& output){
     return fuelOveruseFailsafe(output, res);
 }
 
-vector<pointF> B4::getShipsPositions() const{
-    pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
+vector<pointF> B4::getShipsPositions(const PortMapping& output) const{
+    pointF p(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
-	pointF station( p.first + prevInput.find(STATION_X)->second, p.second + prevInput.find(STATION_Y)->second   );
+	pointF station( p.first + output.find(STATION_X)->second, p.second + output.find(STATION_Y)->second   );
     res.push_back(station);
 
 	for (int i = 0; i < 11 /* 12 */; i++) {	// in spec there are 12 targets (0..11)
-		pointF target( p.first + prevInput.find(TARGETN_X(i))->second, p.second + prevInput.find(TARGETN_Y(i))->second );
+		pointF target( p.first + output.find(TARGETN_X(i))->second, p.second + output.find(TARGETN_Y(i))->second );
 		res.push_back(target);
 	}
 
-	pointF moon( p.first + prevInput.find(MOON_X)->second, p.second + prevInput.find(MOON_Y)->second   );
+	pointF moon( p.first + output.find(MOON_X)->second, p.second + output.find(MOON_Y)->second   );
     res.push_back(moon);
 
     return res;

@@ -6,12 +6,14 @@
 #include "common.h"
 #include "vector.h"
 
+class VM;
+
 class B3 : public Brain{
 public:
-    B3(int scenarioNumber);
+    B3(int scenarioNumber, VM* vm);
     virtual PortMapping _step(const PortMapping& output);
 
-    virtual std::vector<pointF> getShipsPositions() const;
+    virtual std::vector<pointF> getShipsPositions(const PortMapping& output) const;
     virtual int getShipsNumber() const;
 
 private:

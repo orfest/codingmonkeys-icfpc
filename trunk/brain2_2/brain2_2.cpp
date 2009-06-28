@@ -8,7 +8,7 @@
 
 using namespace std;
 
-B2_2::B2_2(int sn):Brain(sn),startTime(-1), step(0) {}
+B2_2::B2_2(int sn, VM* vm):Brain(sn, vm),startTime(-1), step(0) {}
 
 PortMapping B2_2::_step(const PortMapping& output){
 	///** /
@@ -157,11 +157,11 @@ PortMapping B2_2::_step(const PortMapping& output){
 	return res;
 }
 
-vector<pointF> B2_2::getShipsPositions() const{
-    pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
+vector<pointF> B2_2::getShipsPositions(const PortMapping& output) const{
+    pointF p(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
-    pointF target( p.first + prevInput.find(TARGET_X)->second, p.second + prevInput.find(TARGET_Y)->second   );
+    pointF target( p.first + output.find(TARGET_X)->second, p.second + output.find(TARGET_Y)->second   );
     res.push_back(target);
     return res;
 }

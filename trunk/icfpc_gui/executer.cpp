@@ -3,7 +3,7 @@
 Executer::Executer(const Config& conf):config(conf),vm(0),brain(0),tracer(0),timestep(0){
     vm = new VM(config.program_file);
     tracer = new Tracer(config.trace_output, config.scenario_number);
-    brain = Brain::getBrain(config.problem, config.scenario_number);
+    brain = Brain::getBrain(config.problem, config.scenario_number, new VM(config.program_file));
 }
 
 Executer::~Executer(){
