@@ -149,3 +149,22 @@ PortMapping FreeFly::step(const PortMapping& output){
 	timestep++;
 	return res;
 }
+
+PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+		Vector position(-output.find(EARTH_X)->second,-output.find(EARTH_Y)->second);
+		Vector tar = target.minR;
+		tar.normalize();
+		position.normalize();
+		double dot = Vector::dotProduct(tar,position);
+		if (abs(dot+1.0) < 0.0000001){
+			state = COMPLETE;
+		}
+
+	timestep++;
+	return res;
+}
