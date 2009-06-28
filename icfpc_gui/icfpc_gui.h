@@ -18,14 +18,15 @@ public slots:
 
 public:
     icfpc_gui(Executer* ex_, QWidget *parent = 0, Qt::WFlags flags = 0);
-    ~icfpc_gui();
+    virtual ~icfpc_gui();
 
 protected:
     void wheelEvent(QWheelEvent* event);
 
-private slots:
+protected slots:
     void next();
     void updateTimeout(int t);
+    void closeEvent(QCloseEvent*);
 
 private:
     Ui::icfpc_guiClass ui;
