@@ -27,16 +27,24 @@ private:
 	bool rToKnown;
 	double periodFrom;
 	double periodTo;
+	Vector rToMaxTargEarth;
 	enum State {measuring, 
 				waitingJumpFrom, 
 				jumpedFromCircular, 
 				jumpedToCircular, 
 				waitingJumpTo, 
-				following
+				countering,
+				following,
+				steering,
 			   } state;
 
 	double transferTime;
 	bool clockwise;
+	bool targClockwise;
+	int steeringSteps;
+
+	void hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
+						bool toCircular, Vector curMeEarth);
 };
 
 #endif //BRAIN3_H
