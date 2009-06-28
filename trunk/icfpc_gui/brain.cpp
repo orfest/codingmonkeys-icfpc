@@ -25,6 +25,7 @@ const double Brain::fuelEps = 1e-3;
 Brain::Brain(int sn, VM* vm_):scenarioNumber(sn),timestep(0),vm(vm_){}
 
 static double eps = 1;
+static double epsConsiderCircle = 1e4;
 
 Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
     if (problem == 0) {
@@ -32,7 +33,8 @@ Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
 	} else if (problem == 1) {
         return new B2_2(scenarioNumber, vm);
     } else if (problem == 2) {
-        return new B3_3(scenarioNumber, vm);
+        //return new B3_3(scenarioNumber, vm);
+		return new B3(scenarioNumber, vm);
     } else if (problem == 3) {
         return new B4(scenarioNumber, vm);
     } else {
@@ -56,12 +58,10 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 		return actuators;
 
 	double fuelAvailable = sensors.find(FUEL_PORT)->second;
-	if (fuelAvailable < 0.1)
-		fuelAvailable = 0.0;
 	Vector delta(actuators.find(VX_PORT)->second, actuators.find(VY_PORT)->second);
-	if (fuelAvailable < delta.length()) {
+	if (fuelAvailable - fuelEps < delta.length()) {
 		delta.normalize();
-		delta *= fuelAvailable-fuelEps;
+		delta *= (fuelAvailable > fuelEps ? fuelAvailable - fuelEps : 0.0);
 		actuators[VX_PORT] = delta.x;
 		actuators[VY_PORT] = delta.y;
 	}
@@ -72,7 +72,7 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 PortMapping Brain::step(const PortMapping& output) {
 	// hack for Brain4 stub !!!
 	// to use Brain3 (B3) with less bugs add similar hack
-    if (scenarioNumber / 1000 == 4) {
+    if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
 		return _step(output);
     }
 
@@ -294,10 +294,10 @@ double Brain::getPhaseDifference(const Vector & a, const Vector & b) const {
 // Whether it is OK with given precision 'epsilon' to start orbit transfer when 
 // we are in point 'vec' and should start transfer in point 'aphOrPer', which is
 // opposite to point 'perOrAph' on current orbit. This function is circle orbits aware.
-// Determinig circle with precision of 'eps' (in-module).
+// Determinig circle with precision of 'epsConsiderCircle' (in-module).
 bool Brain::isPhaseWithinEpsCircleAware(const Vector & vec, const Vector & aphOrPer, 
 								  const Vector & perOrAph, double epsilon) const {
-	if (abs(aphOrPer.length() - perOrAph.length()) < eps) { // any phase is good for circle
+	if (abs(aphOrPer.length() - perOrAph.length()) < epsConsiderCircle) { // any phase is good for circle
 		return true;
 	}
 	return abs(getPhaseDifference(vec, aphOrPer)) < epsilon;

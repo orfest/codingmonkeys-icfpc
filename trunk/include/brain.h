@@ -56,6 +56,6 @@ protected:
 	Vector getVectorFromPolarAngle(double angle, double scale = 1.0) const;
 	double getPhaseDifference(const Vector & a, const Vector & b) const;
 	bool isPhaseWithinEpsCircleAware(const Vector & vec, const Vector & aphOrPer, 
-								  const Vector & perOrAph, double epsilon = 0.001) const;
+								  const Vector & perOrAph, double epsilon = 0.0005) const;
 };
 #endif //BRAIN_H

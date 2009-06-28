@@ -7,6 +7,9 @@
 using namespace std;
 
 static const double EPS = 5000.0;
+static const double TIME_LIMIT = 3e6;
+static const double MAX_BURST_RATIO = 20.0;
+static const int MAX_STEERING_STEPS = 50;
 
 B3::B3(int sn, VM* vm):Brain(sn, vm){}
 
@@ -74,7 +77,7 @@ PortMapping B3::_step(const PortMapping& output) {
 		rFromKnown = true;
 
 		estimateOrbit(curTargVel, -startTargEarth, targAphelion, targPerihelion);
-		rToMin = targPerihelion.length();
+		rToMin = targAphelion.length();
 		rToMax = targPerihelion.length();
 		rToMaxTargEarth = targPerihelion;
 		rToKnown = true;
@@ -130,6 +133,12 @@ PortMapping B3::_step(const PortMapping& output) {
 			state = waitingJumpFrom;
 	}
 
+	if (state == waitingJumpFrom && periodTo + periodFrom >= TIME_LIMIT / 6 &&
+		getPhaseDifference(-curMeEarth, -curTargEarth) < 0.1) {
+
+		state = following;
+	}
+
 	if (state == waitingJumpFrom && isPhaseWithinEpsCircleAware(-curMeEarth, myPerihelion, myAphelion)) {
 		// !!! && abs(rFromMax - curMeEarth.length()) < 1000 * EPS) {
 		// jump to circular orbit (rFromMax), and immediately to target circular orbit (rToMax)
@@ -153,7 +162,7 @@ PortMapping B3::_step(const PortMapping& output) {
 		// !!! && (curMeEarth - rToMaxTargEarth).length() < 50000 * EPS) {
 		// transfer to elliptic (rToMin, rToMax)
 		hohmannTransfer(res, rToMax, rToMin, false, curMeEarth);
-#if 1
+
 		if (clockwise == targClockwise) {	// flip direction
 			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 			Vector curMyVel = prevMeEarth - curMeEarth;
@@ -164,12 +173,12 @@ PortMapping B3::_step(const PortMapping& output) {
 			res[VY_PORT] = deltaV.y;
 			clockwise = !clockwise;
 		}
-#endif
 
 		state = countering;
 	}
 
-	if (state == countering && (curMeEarth - curTargEarth).length() < 20000) {
+	if (state == countering && abs(getPhaseDifference(-curMeEarth, -curTargEarth)) < 0.001) {
+		// !!! && (curMeEarth - curTargEarth).length() < 20000) {
 		// flip direction
 		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 		Vector curMyVel = prevMeEarth - curMeEarth;
@@ -189,6 +198,8 @@ PortMapping B3::_step(const PortMapping& output) {
 		// steer to the target
 		Vector dirMeTarg = curMeEarth - curTargEarth;
 		Vector deltaV = dirMeTarg * 0.01;
+		if (deltaV.length() > output.find(FUEL_PORT)->second / MAX_BURST_RATIO)
+			deltaV = deltaV.normalize() * output.find(FUEL_PORT)->second / MAX_BURST_RATIO;
 
 		res[VX_PORT] = deltaV.x;
 		res[VY_PORT] = deltaV.y;
@@ -199,7 +210,7 @@ PortMapping B3::_step(const PortMapping& output) {
 
 	if (state == steering && !skipOtherStateChanges) {
 		// if we steer away - return to the pursuit
-		if (steeringSteps++ > 10 && (curMeEarth - curTargEarth).length() > 1000)
+		if (steeringSteps++ > MAX_STEERING_STEPS && (curMeEarth - curTargEarth).length() > 1000)
 			state = following;
 	}
 
