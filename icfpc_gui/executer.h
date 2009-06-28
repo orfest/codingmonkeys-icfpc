@@ -19,6 +19,7 @@ public:
     const PortMapping& getOutput() const { return output; }
     const Config& getConfig() const { return config; }
     int getTimestep() const { return timestep; }
+    static VM* getCloneCurrentVM();
 
 private:
     Config config;
@@ -28,6 +29,7 @@ private:
     PortMapping input;
     PortMapping output;
     int timestep;
+    static VM* globalVM;
 };
 
 #endif //EXECUTER_H

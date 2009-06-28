@@ -22,6 +22,7 @@ inline bit_t bit(bool a){
 
 static const data_t MAGIC = -123456789.8742;
 
+
 VM::VM(const string& file) : status_register(0) {
     code_memory.resize(MEM_SIZE, Instr::getNoop());   
     data_memory.resize(MEM_SIZE, 0.0);
@@ -163,4 +164,21 @@ data_t VM::do_input(addr_t reg){
 
 void VM::do_output(addr_t reg, data_t value){
     output_mapping[reg] = value;
+}
+
+VM::VM(const VM* that){
+    code_memory = that->code_memory;
+    data_memory = that->data_memory;
+
+    status_register = that->status_register;
+
+    input_mapping = that->input_mapping;
+    output_mapping = that->output_mapping;
+
+    realCodeSize = that->realCodeSize;
+}
+
+VM* VM::getClone() const{
+    VM* res = new VM(this);
+    return res;
 }

@@ -14,6 +14,7 @@
 #include "vector.h"
 
 #include "vm.h"
+#include "executer.h"
 
 using namespace std;
 
@@ -196,4 +197,25 @@ double Brain::getPolarAngle(const Vector& v) const {
         res = -res;
     }
     return res;
+}
+
+int Brain::estimateTimeToPoint(const Vector& point) const{
+    static const double LIMIT = 2000;
+    VM* vm = Executer::getCloneCurrentVM();
+ 	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+    PortMapping output;
+    for (int t = 0; t < 3000000; t++){
+        output = vm->step(res);
+        Vector current(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);       //!!
+        current -= point;
+        if (current.length() < LIMIT){
+            delete vm;
+            return t+1;
+        }
+    }
+    delete vm;
+    return -1;
 }
