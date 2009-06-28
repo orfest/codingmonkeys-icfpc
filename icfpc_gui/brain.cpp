@@ -9,6 +9,7 @@
 #include "brain2.h"
 #include "brain2_2.h"
 #include "brain3.h"
+#include "brain3_3.h"
 #include "brain4.h"
 #include "vector.h"
 
@@ -29,7 +30,7 @@ Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
 	} else if (problem == 1) {
         return new B2_2(scenarioNumber, vm);
     } else if (problem == 2) {
-        return new B3(scenarioNumber, vm);
+		return new B3_3(scenarioNumber, vm);
     } else if (problem == 3) {
         return new B4(scenarioNumber, vm);
     } else {
