@@ -87,23 +87,29 @@ PortMapping Brain::step(const PortMapping& output) {
         simulateAndGetOrbits();
 
 	}else if (timestep > 1){
-		if (state == WAITING){
-			if (operation_list.empty()){
-				_step(output);
-			}
-			if (!operation_list.empty()){
-				Operation* oper = operation_list.front();
-				state = RUNNING;
-				res = oper->step(output);
-			}
-		} else if (state == RUNNING) {
-			Operation* oper = operation_list.front();
-			res = oper->step(output);
-			if (oper->state == COMPLETE){
+		do {
+			if (state == COMPLETE)
 				state = WAITING;
-				operation_list.pop();
+			if (state == WAITING){
+				if (operation_list.empty()){
+					_step(output);
+				}
+				if (!operation_list.empty()){
+					Operation* oper = operation_list.front();
+					state = RUNNING;
+					PortMapping tmp = oper->step(output);
+					res[VX_PORT] += tmp[VX_PORT];
+					res[VY_PORT] += tmp[VY_PORT];
+				}
+			} else if (state == RUNNING) {
+				Operation* oper = operation_list.front();
+				res = oper->step(output);
+				if (oper->state == COMPLETE){
+					state = COMPLETE;
+					operation_list.pop();
+				}
 			}
-		}
+		} while (state == COMPLETE);
 	}
 
 	prevResult = res;
