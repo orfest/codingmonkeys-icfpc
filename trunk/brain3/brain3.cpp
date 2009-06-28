@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static const double EPS = 10;
+static const double EPS = 0.1;
 
 B3::B3(int sn):Brain(sn) {}
 
@@ -26,6 +26,7 @@ PortMapping B3::step(const PortMapping& output){
 	res[VY_PORT] = 0;
 
 	Vector curMeEarth, curTargEarth;
+	bool skipOtherStateChanges = false;
 
     if (timestep == 0) {
         assert(output.empty());
@@ -53,10 +54,16 @@ PortMapping B3::step(const PortMapping& output){
 		double aFrom = - MU_CONST / (2 * energy);
 		periodFrom = ALPHA_CONST * pow(aFrom, 1.5);
 
+		Vector tangentMy(curMeEarth.y, -curMeEarth.x);
+		clockwise = ( Vector::dotProduct(curMyVel, tangentMy) > 0.0 );
+
 		Vector curTargVel = startTargEarth - curTargEarth;
 		energy = curTargVel.sqLength() / 2 - MU_CONST / curTargEarth.length();
 		double aTo = - MU_CONST / (2 * energy);
 		periodTo = ALPHA_CONST * pow(aTo, 1.5);
+
+		Vector tangentTarg(curTargEarth.y, -curTargEarth.x);
+		targClockwise = ( Vector::dotProduct(curTargVel, tangentTarg) > 0.0 );
 	}
 
 	if (timestep > 0) {
@@ -72,8 +79,10 @@ PortMapping B3::step(const PortMapping& output){
 		if (!rToKnown && timestep < ceil(1 + periodTo)) {
 			if (curTargEarth.length() < rToMin)
 				rToMin = curTargEarth.length();
-			if (curTargEarth.length() > rToMax)
+			if (curTargEarth.length() > rToMax) {
 				rToMax = curTargEarth.length();
+				rToMaxTargEarth = curTargEarth;
+			}
 		} else if (timestep == ceil(1 + periodTo)) {
 			rToKnown = true;
 		}
@@ -83,7 +92,12 @@ PortMapping B3::step(const PortMapping& output){
 	}
 
 	if (state == waitingJumpFrom && abs(rFromMax - curMeEarth.length()) < EPS) {
-		// jump to circular orbit, and immediately to target circular orbit
+		// jump to circular orbit (rFromMax), and immediately to target circular orbit (rToMax)
+		// this effectively transfers to elliptic (rFromMax, rToMax)
+		hohmannTransfer(res, rFromMin, rFromMax, true, curMeEarth);
+		hohmannTransfer(res, rFromMax, rToMax, false, curMeEarth);
+
+		/*
 		double delta_v2 = sqrt(MU_CONST / rFromMax) * (1 - sqrt(2 * rFromMin / (rFromMin + rFromMax)));
 		Vector tangent(curMeEarth.y, -curMeEarth.x);
 		tangent.normalize();
@@ -100,18 +114,24 @@ PortMapping B3::step(const PortMapping& output){
 		double delta_v1 = sqrt(MU_CONST / rFromMax) * (sqrt(2 * rToMax / (rFromMax + rToMax)) - 1);
 
 		Vector delta = tangent * (delta_v1 + delta_v2);
-		res[VX_PORT] = delta.x;
-		res[VY_PORT] = delta.y;
+		res[VX_PORT] += delta.x;
+		res[VY_PORT] += delta.y;
+		*/
 		state = jumpedFromCircular;
 	}
 
-	if (state == jumpedFromCircular && abs(rToMax - curMeEarth.length()) < EPS) {
+	if (state == jumpedFromCircular && abs(rToMax - curMeEarth.length()) < 100 * EPS) {
+		// transfer to circular (rToMax)
+		hohmannTransfer(res, rFromMax, rToMax, true, curMeEarth);
+
+		/*
 		double delta_v2 = sqrt(MU_CONST / rToMax) * (1 - sqrt(2 * rFromMax / (rFromMax + rToMax)));
 		Vector tangent(curMeEarth.y, -curMeEarth.x);
 		tangent.normalize();
 		Vector curVel = curMeEarth - Vector(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 		if (!clockwise)
 			tangent = -tangent;
+		// TODO do not flip direction here!
 		if (rToMax > rFromMax) { // flip direction here
 			delta_v2 = delta_v2 + 2 * curVel.length();
 			tangent = -tangent;
@@ -119,9 +139,78 @@ PortMapping B3::step(const PortMapping& output){
 		}
 
 		Vector delta = tangent * delta_v2;
-		res[VX_PORT] = delta.x;
-		res[VY_PORT] = delta.y;
+		res[VX_PORT] += delta.x;
+		res[VY_PORT] += delta.y;
+		*/
 		state = waitingJumpTo;
+	}
+
+	if (state == waitingJumpTo && (curMeEarth - rToMaxTargEarth).length() < 50000 * EPS) {
+		// transfer to elliptic (rToMin, rToMax)
+		hohmannTransfer(res, rToMax, rToMin, false, curMeEarth);
+
+		if (clockwise == targClockwise) {	// flip direction
+			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+			Vector curMyVel = prevMeEarth - curMeEarth;
+			Vector curDeltaV(res[VX_PORT], res[VY_PORT]);
+			Vector deltaV = - curMyVel * 2 - curDeltaV;
+
+			res[VX_PORT] = deltaV.x;
+			res[VY_PORT] = deltaV.y;
+			clockwise = !clockwise;
+		}
+
+		state = countering;
+	}
+
+	if (state == countering && (curMeEarth - curTargEarth).length() < 50000 * EPS) {
+		// flip direction
+		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+		Vector curMyVel = prevMeEarth - curMeEarth;
+		Vector curDeltaV(res[VX_PORT], res[VY_PORT]);
+		Vector deltaV = - curMyVel * 2 - curDeltaV;
+
+		res[VX_PORT] = deltaV.x;
+		res[VY_PORT] = deltaV.y;
+		clockwise = !clockwise;
+		assert(clockwise == targClockwise);
+		state = following;
+		skipOtherStateChanges = true;
+	}
+
+	if (state == following && !skipOtherStateChanges && 
+								(curMeEarth - curTargEarth).length() > 1000) {
+		// steer to the target
+		Vector dirMeTarg = curMeEarth - curTargEarth;
+		Vector deltaV = dirMeTarg * 0.01;
+
+		res[VX_PORT] = deltaV.x;
+		res[VY_PORT] = deltaV.y;
+		state = steering;
+		steeringSteps = 0;
+		skipOtherStateChanges = true;
+	}
+
+	if (state == steering && !skipOtherStateChanges) {
+		// if we steer away - return to the pursuit
+		if (steeringSteps++ > 10 && (curMeEarth - curTargEarth).length() > 1000)
+			state = following;
+	}
+
+	if (state == steering && !skipOtherStateChanges && 
+								(curMeEarth - curTargEarth).length() < 500) {
+		// remove steering velocity component and continue pursuit
+		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+		Vector curMyVel = prevMeEarth - curMeEarth;
+
+		Vector prevTargEarth = prevMeEarth - Vector(prevInput.find(SATELLITE_X)->second, prevInput.find(SATELLITE_Y)->second);
+		Vector curTargVel = prevTargEarth - curTargEarth;
+
+		Vector deltaV = curTargVel - curMyVel;
+		res[VX_PORT] = deltaV.x;
+		res[VY_PORT] = deltaV.y;
+		state = following;
+		skipOtherStateChanges = true;
 	}
 
 	// TODO 
@@ -143,4 +232,21 @@ vector<pointF> B3::getShipsPositions() const{
 
 int B3::getShipsNumber() const{
     return 2;
+}
+
+void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, bool toCircular, Vector curMeEarth) {
+	double delta_v;
+	if (toCircular)
+		delta_v = sqrt(MU_CONST / toR) * (1 - sqrt(2 * fromR / (fromR + toR)));
+	else
+		delta_v = sqrt(MU_CONST / fromR) * (sqrt(2 * toR / (fromR + toR)) - 1);
+
+	Vector tangent(curMeEarth.y, -curMeEarth.x);
+	tangent.normalize();
+	if (!clockwise)
+		tangent = -tangent;
+
+	Vector delta = tangent * delta_v;
+	actuators[VX_PORT] += delta.x;
+	actuators[VY_PORT] += delta.y;
 }
