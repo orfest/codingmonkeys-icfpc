@@ -9,14 +9,13 @@
 class B2_2 : public Brain{
 public:
     B2_2(int scenarioNumber);
-    virtual PortMapping step(const PortMapping& output);
+    virtual PortMapping _step(const PortMapping& output);
 
     virtual std::vector<pointF> getShipsPositions() const;
     virtual int getShipsNumber() const;
 
 private:
-    PortMapping prevResult;
-    PortMapping prevInput;
+	int step;
 	double me_r;
 	double alp;
 	double that_r;
