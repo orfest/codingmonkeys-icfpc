@@ -276,16 +276,6 @@ void B3::estimateOrbit(const Vector & velocity, const Vector & position,
 	aphelionPos = center - dirToCenter * sMjAxis;
 }
 
-double B3::getPolarAngle(const Vector& v) const {
-    Vector norm(v);
-    norm.normalize();
-    double res = acos(norm.x);
-    if (norm.y < 0){
-        res = -res;
-    }
-    return res;
-}
-
 Vector B3::getVectorFromPolarAngle(double angle) const {
 	return Vector(cos(angle), sin(angle));
 }

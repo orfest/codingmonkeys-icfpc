@@ -39,6 +39,7 @@ protected:
     std::vector<Orbit> orbits;
     void simulateAndGetOrbits();
     bool isClockwise(const Vector& newPosition, const Vector& prevPosition) const;
+    double getPolarAngle(const Vector& v) const;
 
 	PortMapping & fuelOveruseFailsafe(const PortMapping & sensors, PortMapping & actuators);
 };

@@ -51,7 +51,6 @@ private:
 						bool toCircular, Vector curMeEarth) const;
 	void estimateOrbit(const Vector & velocity, const Vector & position, 
 						Vector & aphelionPos, Vector & perihelionPos) const;
-	double getPolarAngle(const Vector& v) const;
 	Vector getVectorFromPolarAngle(double angle) const;
 };
 
