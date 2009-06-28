@@ -13,12 +13,6 @@ struct Orbit{
 	Vector maxR;
 };
 
-enum OPERATION{
-	INITIALIZATION,
-	HOHMAN_ORBIT_TRANSFER,
-	BI_ELLIPTIC_TRANSFER,
-    FLIP_DIRECTION
-};
 
 enum STATE{
 	WAITING,
@@ -67,6 +61,13 @@ class FreeFly : public Operation {
 public:
 	virtual PortMapping step(const PortMapping& output);
 
+	double transferTime;
+};
+
+class FreeFlyToOpositPoint : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+	
 	double transferTime;
 };
 
