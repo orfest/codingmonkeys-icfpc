@@ -32,10 +32,7 @@ PortMapping B3_3::_step(const PortMapping& output){
 		Orbit target;
 		target.minR = orbits[1].minR;
 		target.maxR = orbits[0].minR;
-		if (abs(pow(orbits[0].minR.x,2) + pow(orbits[0].minR.y,2)- 
-			pow(orbits[0].maxR.x,2) + pow(orbits[0].maxR.y,2)) > 0.000001){
-			target.minR = 1000;
-		}
+		
 		static FreeFlyToOpositPoint op1;
 		op1.SetTarget(target);
 		operation_list.push(static_cast<Operation*>(&op1));
@@ -44,7 +41,12 @@ PortMapping B3_3::_step(const PortMapping& output){
 		target.maxR = orbits[1].minR;
 		hoh1.SetTarget(target);
 		operation_list.push(static_cast<Operation*>(&hoh1));
-		double alp = 7291.5;//estimateTimeToPerihelion(target);
+	} else if (step == 1) {
+		//double alp = 7291.5;//estimateTimeToPerihelion(target);
+		Orbit target;
+		target.minR = orbits[1].minR;
+		target.maxR = orbits[0].minR;
+		double alp = -6690;
 		double r0 = sqrt(pow(target.maxR.x,2) + pow(target.maxR.y,2));
 		double r1 = sqrt(pow(orbits[1].maxR.x,2) + pow(orbits[1].maxR.y,2));
 		double rt = pow( MU_CONST*pow(alp/(2.0*M_PI),2.0) ,1.0/3) - r0;
