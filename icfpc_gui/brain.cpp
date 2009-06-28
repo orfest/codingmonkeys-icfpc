@@ -101,6 +101,10 @@ PortMapping Brain::step(const PortMapping& output) {
 					PortMapping tmp = oper->step(output);
 					res[VX_PORT] += tmp[VX_PORT];
 					res[VY_PORT] += tmp[VY_PORT];
+					if (oper->state == COMPLETE){
+						state = COMPLETE;
+						operation_list.pop();
+					}
 				}
 			} else if (state == RUNNING) {
 				Operation* oper = operation_list.front();

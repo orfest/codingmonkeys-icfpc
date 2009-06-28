@@ -124,6 +124,7 @@ PortMapping EllipticToCircle::step(const PortMapping& output){
 		res[VX_PORT] = delta.x;
 		res[VY_PORT] = delta.y;
 		transferTime = M_PI * sqrt(pow(r1 + r2, 3) / (8 * MU_CONST));
+		state = COMPLETE;
 	}
 	if (timestep == ceil(transferTime)) {
 		assert(ceil(transferTime) > 1);
