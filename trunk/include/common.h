@@ -60,7 +60,6 @@ DECL_TARGETN(7)
 DECL_TARGETN(8)
 DECL_TARGETN(9)
 DECL_TARGETN(10)
-DECL_TARGETN(11)
 
 #undef DECL_TARGETN
 
@@ -75,6 +74,7 @@ static const double MU_CONST = GRAVITATIONAL_CONST * EARTH_MASS;
 static const double ALPHA_CONST = 2.0 * M_PI / sqrt(MU_CONST);
 
 static const double MOON_MASS = 7.347e22;
+static const double MOON_RADIUS = 1.738e6;
 static const double MOON_MU_CONST = GRAVITATIONAL_CONST * MOON_MASS;
 static const double MOON_ALPHA_CONST = 2.0 * M_PI / sqrt(MOON_MU_CONST);
 

@@ -43,7 +43,7 @@ vector<pointF> B4::getShipsPositions(const PortMapping& output) const{
 	pointF station( p.first + output.find(STATION_X)->second, p.second + output.find(STATION_Y)->second   );
     res.push_back(station);
 
-	for (int i = 0; i < 11 /* 12 */; i++) {	// in spec there are 12 targets (0..11)
+	for (int i = 0; i < 11; i++) {	
 		pointF target( p.first + output.find(TARGETN_X(i))->second, p.second + output.find(TARGETN_Y(i))->second );
 		res.push_back(target);
 	}
@@ -55,5 +55,5 @@ vector<pointF> B4::getShipsPositions(const PortMapping& output) const{
 }
 
 int B4::getShipsNumber() const{
-    return 2+11+1;	// in spec 2+12+1
+    return 2+11+1;
 }
