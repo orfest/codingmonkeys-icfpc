@@ -50,5 +50,12 @@ protected:
     int estimateTimeToAphelion(const Orbit& orbit) const{
         return estimateTimeToPoint(orbit.minR);
     }
+
+	void estimateOrbit(const Vector & velocity, const Vector & position, 
+						Vector & aphelionPos, Vector & perihelionPos) const;
+	Vector getVectorFromPolarAngle(double angle, double scale = 1.0) const;
+	double getPhaseDifference(const Vector & a, const Vector & b) const;
+	bool isPhaseWithinEpsCircleAware(const Vector & vec, const Vector & aphOrPer, 
+								  const Vector & perOrAph, double epsilon = 0.001) const;
 };
 #endif //BRAIN_H

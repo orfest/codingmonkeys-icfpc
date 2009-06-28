@@ -70,7 +70,8 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 
 PortMapping Brain::step(const PortMapping& output) {
-	// hack for Brain3 implementation and Brain4 stub !!!
+	// hack for Brain4 stub !!!
+	// to use Brain3 (B3) with less bugs add similar hack
     if (scenarioNumber / 1000 == 4) {
 		return _step(output);
     }
@@ -193,6 +194,7 @@ bool Brain::isClockwise(const Vector& newPosition, const Vector& prevPosition) c
     return clockwise;
 }
 
+// returns value in range [-pi, pi]
 double Brain::getPolarAngle(const Vector& v) const {
     Vector norm(v);
     norm.normalize();
@@ -222,4 +224,81 @@ int Brain::estimateTimeToPoint(const Vector& point) const{
     }
     delete vm;
     return -1;
+}
+
+// will return aphelion and perihelion positions for arbitrary ellipse orbit
+// given orbit point and velocity at that point
+void Brain::estimateOrbit(const Vector & velocity, const Vector & position, 
+										Vector & aphelionPos, Vector & perihelionPos) const {
+	assert(velocity.length() > 1e-3);
+	assert(position.length() > 1e-3);
+
+	struct Vector3D {
+		double x, y, z;
+		Vector3D(double x = 0.0, double y = 0.0, double z = 0.0) : x(x), y(y), z(z) {}
+		Vector3D(const Vector3D & vec) : x(vec.x), y(vec.y), z(vec.z) {}
+		Vector3D(const Vector & vec) : x(vec.x), y(vec.y), z(0.0) {}
+		static Vector3D crossProduct(const Vector3D & a, const Vector3D & b) {
+			return Vector3D(a.y * b.z - a.z * b.y, 
+							a.z * b.x - a.x * b.z, 
+							a.x * b.y - a.y * b.x);
+		}
+	};
+
+	Vector3D r(position);
+	Vector3D v(velocity);
+	Vector3D e = Vector3D::crossProduct(v, Vector3D::crossProduct(r, v));
+	assert(abs(e.z) < 1e-6);
+
+	Vector eccent(e.x, e.y);
+	eccent = eccent / MU_CONST - Vector(position).normalize();
+	Vector aphelionDir(eccent);
+	aphelionDir.normalize();
+	double eccentMod = eccent.length();
+
+	double energy = velocity.sqLength() / 2 - MU_CONST / position.length();
+	double sMjAxis = - MU_CONST / (2 * energy);
+#if 0	
+	// those values may be useful
+	double l = Vector::crossProduct(position, velocity);
+	double alpha = l * l / MU_CONST;
+	double sMnAxis = sqrt(alpha * sMjAxis);
+	double sqEccent = 1 - pow(sMnAxis / sMjAxis, 2);
+	double eccentricity = sqrt(sqEccent);
+	assert(abs(eccentricity - eccentMod) < 1e-6);
+#endif
+
+	aphelionPos = aphelionDir * ((1 - eccentMod) * sMjAxis);
+	perihelionPos = - aphelionDir * ((1 + eccentMod) * sMjAxis);
+}
+
+Vector Brain::getVectorFromPolarAngle(double angle, double scale) const {
+	return Vector(cos(angle), sin(angle)) * scale;
+}
+
+// returns (absolutely minimum) signed difference in phase between two vectors
+// if positive values mean that shortest way to get from 'a' to 'b' is clockwise
+double Brain::getPhaseDifference(const Vector & a, const Vector & b) const {
+	double angA = getPolarAngle(a);
+	double angB = getPolarAngle(b);
+	if (angA - angB > M_PI)
+		return angA - (angB + 2*M_PI);
+	else if (angA - angB >= 0)
+		return angA - angB;
+	else if (angA - angB >= -M_PI)
+		return angA + 2*M_PI - angB;
+	else
+		return angA - angB;
+}
+
+// Whether it is OK with given precision 'epsilon' to start orbit transfer when 
+// we are in point 'vec' and should start transfer in point 'aphOrPer', which is
+// opposite to point 'perOrAph' on current orbit. This function is circle orbits aware.
+// Determinig circle with precision of 'eps' (in-module).
+bool Brain::isPhaseWithinEpsCircleAware(const Vector & vec, const Vector & aphOrPer, 
+								  const Vector & perOrAph, double epsilon) const {
+	if (abs(aphOrPer.length() - perOrAph.length()) < eps) { // any phase is good for circle
+		return true;
+	}
+	return abs(getPhaseDifference(vec, aphOrPer)) < epsilon;
 }

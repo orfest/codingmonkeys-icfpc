@@ -30,6 +30,7 @@ private:
 	Vector rToMaxTargEarth;
 	Vector myAphelion, myPerihelion;
 	Vector targAphelion, targPerihelion;
+	Vector jumpFromCircPos;
 	enum State {measuring, 
 				waitingJumpFrom, 
 				jumpedFromCircular, 
@@ -47,9 +48,6 @@ private:
 
 	void hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
 						bool toCircular, Vector curMeEarth) const;
-	void estimateOrbit(const Vector & velocity, const Vector & position, 
-						Vector & aphelionPos, Vector & perihelionPos) const;
-	Vector getVectorFromPolarAngle(double angle) const;
 };
 
 #endif //BRAIN3_H
