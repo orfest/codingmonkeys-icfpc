@@ -247,19 +247,27 @@ void B3::estimateOrbit(const Vector & velocity, const Vector & position,
 	double l = Vector::crossProduct(position, velocity);
 	double alpha = l * l / MU_CONST;
 	double alphaR = 1 - alpha / r;
+	if (abs(alphaR) < 1e-5) {	// this is circle
+		aphelionPos = position;
+		perihelionPos = -position;
+		return;
+	}
+
 	double sqCosThetas = 1 / (velocity.sqLength() * pow( (2 * r - alpha) / (l * alphaR), 2.0 ) + 1);
 	double cosThetas = sqrt(sqCosThetas);
 	double eccentricity = - alphaR / cosThetas;
+	assert(eccentricity >= 0.0 && eccentricity <= 1.0);
 	double focusToCenter = eccentricity * sMjAxis;
 
-	double sqEccent = velocity.sqLength() * pow(alpha / l, 2) + pow(alphaR, 2);
-	assert(abs(sqrt(sqEccent) - eccentricity) < 0.0001);
+	double sqEccent2 = velocity.sqLength() * pow(alpha / l, 2) + pow(alphaR, 2);
+	assert(abs(sqrt(sqEccent2) - eccentricity) < 0.0001);
+	//double cosThetas2 = - alphaR / sqrt(sqEccent2);
+	double sinThetas2 = velocity.length() * (1 - alphaR) * r / (sqrt(sqEccent2) * l);
 
-	// TODO is this correct in all cases (signs) ?
+	// TODO check if this is correct in all cases (signs) ?
 	double thetas = acos(cosThetas);
 	double theta = getPolarAngle(position);
-	double theta0 = theta - thetas;
-	//theta0 = theta + thetas;
+	double theta0 = theta - (sinThetas2 < 0 ? -1 : 1) * thetas;
 
 	Vector dirToCenter = getVectorFromPolarAngle(theta0);
 	Vector center = dirToCenter * focusToCenter;
