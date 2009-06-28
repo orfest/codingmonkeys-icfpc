@@ -8,7 +8,7 @@
 
 using namespace std;
 
-B2::B2(int sn):Brain(sn),startTime(-1) {}
+B2::B2(int sn, VM * vm):Brain(sn, vm),startTime(-1) {}
 
 PortMapping B2::step(const PortMapping& output){
 	/** /
