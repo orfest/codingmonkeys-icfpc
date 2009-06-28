@@ -62,7 +62,7 @@ DECL_TARGETN(9)
 DECL_TARGETN(10)
 DECL_TARGETN(11)
 
-#undef DECL_TARGETN(n)
+#undef DECL_TARGETN
 
 static const addr_t MOON_X = 0x64;
 static const addr_t MOON_Y = 0x65;

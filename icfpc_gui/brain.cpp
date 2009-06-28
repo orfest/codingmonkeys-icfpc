@@ -40,6 +40,8 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 		return actuators;
 
 	double fuelAvailable = sensors.find(FUEL_PORT)->second;
+	if (fuelAvailable < 0.1)
+		fuelAvailable = 0.0;
 	Vector delta(actuators.find(VX_PORT)->second, actuators.find(VY_PORT)->second);
 	if (fuelAvailable < delta.length()) {
 		delta.normalize();
