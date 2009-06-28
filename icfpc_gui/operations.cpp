@@ -192,7 +192,5 @@ PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 		if (abs(dot+1.0) < 0.0000001){
 			state = COMPLETE;
 		}
-
-	timestep++;
 	return res;
 }
