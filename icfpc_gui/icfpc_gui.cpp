@@ -4,6 +4,7 @@
 #include <vector>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QWheelEvent>
 
 #include <map>
 #include <exception>
@@ -19,6 +20,8 @@ icfpc_gui::icfpc_gui(Executer* ex_, QWidget *parent, Qt::WFlags flags)
     connect(ui.action_Start, SIGNAL(triggered()), this, SLOT(start()));
     connect(ui.actionPause, SIGNAL(triggered()), this, SLOT(pause()));
     connect(ui.actionS_top, SIGNAL(triggered()), this, SLOT(stop()));
+    connect(ui.zoomSlider, SIGNAL(valueChanged(int)), ui.space, SLOT(zoomChanged(int)));
+    ui.space->zoomChanged(ui.zoomSlider->value());
 
     connect(ui.timeoutSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateTimeout(int)));
 
@@ -34,7 +37,7 @@ icfpc_gui::~icfpc_gui() {
 }
 
 void icfpc_gui::next(){
-    for (int i = 0; i < 30; i++){
+    for (int i = 0; i < 10; i++){
         if (!ex->nextStep()){
             timer->stop();
             break;
@@ -77,18 +80,19 @@ void icfpc_gui::updateTable(){
         throw std::exception("Number of rows decreases O__o");
     }
     int cnt = 0;
-    for (std::map<addr_t, data_t>::const_iterator it = ex->getOutput().begin(); it != ex->getOutput().end(); it++, cnt++){
-        QTableWidgetItem* port = new QTableWidgetItem(QString("%1").arg(it->first));
-        QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(it->second));
+    {
+        QTableWidgetItem* port = new QTableWidgetItem("Seconds");
+        QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(ex->getTimestep()));
         if (table->rowCount() <= cnt){
             table->insertRow(cnt);
         }
         table->setItem(cnt, 0, port);
         table->setItem(cnt, 1, value);
+        cnt++;
     }
-    {
-        QTableWidgetItem* port = new QTableWidgetItem("Seconds");
-        QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(ex->getTimestep()));
+    for (std::map<addr_t, data_t>::const_iterator it = ex->getOutput().begin(); it != ex->getOutput().end(); it++, cnt++){
+        QTableWidgetItem* port = new QTableWidgetItem(QString("%1").arg(it->first));
+        QTableWidgetItem* value = new QTableWidgetItem(QString("%1").arg(it->second));
         if (table->rowCount() <= cnt){
             table->insertRow(cnt);
         }
@@ -110,4 +114,14 @@ void icfpc_gui::reset(){
     delete ex;
     ex = ex2;
 	ui.space->reset();
+}
+
+void icfpc_gui::wheelEvent(QWheelEvent* event){
+     int numDegrees = event->delta() / 8;
+     int numSteps = abs(numDegrees)/2;
+     if (numDegrees < 0) {
+         numSteps = -numSteps;
+     }
+     ui.zoomSlider->setValue(ui.zoomSlider->value() + numSteps);
+     QWidget::wheelEvent(event);
 }

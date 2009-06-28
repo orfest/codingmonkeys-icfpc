@@ -10,7 +10,6 @@ class SimulationWidget : public QWidget{
     Q_OBJECT
 
     static const qreal EARTH_RADIUS;
-    static qreal MIN_X_OR_Y;
     static const int SHIP_SIZE = 8;
 	static const int TOTAL_MAX_POINTS = 2000;
 
@@ -20,11 +19,21 @@ public:
     void setShipsNumber(int ships_number);
 	void reset();
 
+public slots:
+    void zoomChanged(int);
+
 protected:
     void paintEvent(QPaintEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
 
 private:
     QVector<Ship> ships;
+    bool dragging;
+    QPointF center;
+    QPoint prevMouse;
+    qreal MIN_X_OR_Y;
 };
 
 #endif //SIMULATION_WIDGET_H
