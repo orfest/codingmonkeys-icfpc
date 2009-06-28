@@ -17,8 +17,6 @@ public:
     virtual int getShipsNumber() const;
 
 private:
-    PortMapping prevResult;
-    PortMapping prevInput;
 	Vector startMeEarth;
 	Vector startTargEarth;
 	double rFromMin;
