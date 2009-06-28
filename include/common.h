@@ -40,6 +40,10 @@ static const addr_t STATION_X = 0x4;
 static const addr_t STATION_Y = 0x5;
 static const addr_t FUEL_ON_STATION = 0x6;
 
+inline addr_t TARGETN_X(int n) {return 0x7 + 3*n;}
+inline addr_t TARGETN_Y(int n) {return 0x8 + 3*n;}
+inline addr_t TARGETN_COLLECTED(int n) {return 0x9 + 3*n;}
+
 #define DECL_TARGETN(n)	\
 	static const addr_t TARGET##n##_X = (0x7 + 3*n);		\
 	static const addr_t TARGET##n##_Y = (0x8 + 3*n);		\
@@ -69,5 +73,10 @@ static const double EARTH_MASS = 6.0e24;
 static const double EARTH_RADIUS = 6.357e6;
 static const double MU_CONST = GRAVITATIONAL_CONST * EARTH_MASS;
 static const double ALPHA_CONST = 2.0 * M_PI / sqrt(MU_CONST);
+
+static const double MOON_MASS = 7.347e22;
+static const double MOON_MU_CONST = GRAVITATIONAL_CONST * MOON_MASS;
+static const double MOON_ALPHA_CONST = 2.0 * M_PI / sqrt(MOON_MU_CONST);
+
 
 #endif //COMMON_H
