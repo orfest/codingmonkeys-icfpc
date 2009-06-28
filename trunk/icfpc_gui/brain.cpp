@@ -21,6 +21,8 @@ PortMapping Brain::prevResult = PortMapping();
 
 Brain::Brain(int sn, VM* vm_):scenarioNumber(sn),timestep(0),vm(vm_){}
 
+static double eps = 1;
+
 Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
     if (problem == 0) {
         return new B1(scenarioNumber, vm);
@@ -122,6 +124,7 @@ void Brain::simulateAndGetOrbits(){
     vector<int> maxDistTime(numShips, -1);
     vector<int> minDistTime(numShips, -1);
     vector<int> done(numShips, 0);
+    vector<double> startPolarAngle(numShips);
 
     int toexamine = numShips;
     for (int t = 0; toexamine > 0 && t < 3000000; t++){
@@ -134,19 +137,27 @@ void Brain::simulateAndGetOrbits(){
         for (int i = 0; i < numShips; i++){
             if (done[i]) continue;
             Vector pos(shipsPositions[i].first, shipsPositions[i].second);
+            if (t == 0){
+                startPolarAngle[i] = getPolarAngle(pos);
+            }
             double dist = pos.length();
-            if (dist > maxDist[i]){
+            if (dist > maxDist[i] + eps){
                 maxDist[i] = dist;
                 maxDistTime[i] = t;
             }
-            if (dist < minDist[i]){
+            if (dist < minDist[i] - eps){
                 minDist[i] = dist;
                 minDistTime[i] = t;
             }
-            if (minDistTime[i] >= 0 && maxDistTime[i] >= 0 && 
-                    (t - max(minDistTime[i],maxDistTime[i])) > 2*(abs(maxDistTime[i] - minDistTime[i])))  {
-                done[i] = 1;
-                toexamine--;
+            if (t > 1000){
+                double curPolarAngle = getPolarAngle(pos);
+                double diffPolarAngle = curPolarAngle - startPolarAngle[i];
+                while (diffPolarAngle < -M_PI) diffPolarAngle += 2*M_PI;
+                while (diffPolarAngle > M_PI) diffPolarAngle -= 2*M_PI;
+                if (abs(diffPolarAngle) < 0.002){
+                    done[i] = 1;
+                    toexamine--;
+                }
             }
         }
         if (t == 0){
@@ -162,4 +173,14 @@ bool Brain::isClockwise(const Vector& newPosition, const Vector& prevPosition) c
     Vector tangent(newPosition.y, -newPosition.x);      // turned 90 clockwise
 	bool clockwise = ( Vector::dotProduct(move, tangent) > 0.0 );
     return clockwise;
+}
+
+double Brain::getPolarAngle(const Vector& v) const {
+    Vector norm(v);
+    norm.normalize();
+    double res = acos(norm.x);
+    if (norm.y < 0){
+        res = -res;
+    }
+    return res;
 }

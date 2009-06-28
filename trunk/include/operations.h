@@ -8,6 +8,7 @@
 #include "common.h"
 
 struct Orbit{
+    bool clockwise;
 	Vector minR;
 	Vector maxR;
 };
