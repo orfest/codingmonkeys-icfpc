@@ -20,6 +20,9 @@ public:
     icfpc_gui(Executer* ex_, QWidget *parent = 0, Qt::WFlags flags = 0);
     ~icfpc_gui();
 
+protected:
+    void wheelEvent(QWheelEvent* event);
+
 private slots:
     void next();
     void updateTimeout(int t);
