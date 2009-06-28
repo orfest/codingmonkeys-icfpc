@@ -43,5 +43,12 @@ protected:
     double getPolarAngle(const Vector& v) const;
 
 	PortMapping & fuelOveruseFailsafe(const PortMapping & sensors, PortMapping & actuators);
+    int estimateTimeToPoint(const Vector& point) const;
+    int estimateTimeToPerihelion(const Orbit& orbit) const{
+        return estimateTimeToPoint(orbit.maxR);
+    }
+    int estimateTimeToAphelion(const Orbit& orbit) const{
+        return estimateTimeToPoint(orbit.minR);
+    }
 };
 #endif //BRAIN_H

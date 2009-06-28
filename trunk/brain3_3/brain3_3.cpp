@@ -4,6 +4,8 @@
 #include <iostream>
 #include <assert.h>
 
+#include "operations.h"
+
 using namespace std;
 
 static const double EPS = 0.1;
@@ -42,8 +44,9 @@ PortMapping B3_3::_step(const PortMapping& output){
 		target.maxR = orbits[1].minR;
 		el1.SetTarget(target);
 		operation_list.push(static_cast<Operation*>(&el1));
-
-		double alp;
+    } else {
+        int alp = estimateTimeToPerihelion(target.maxR);
+        int i = 1;
 	}
 
     prevResult = res;

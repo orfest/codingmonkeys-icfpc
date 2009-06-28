@@ -1,7 +1,9 @@
 #include "executer.h"
 
+VM* Executer::globalVM = 0;
+
 Executer::Executer(const Config& conf):config(conf),vm(0),brain(0),tracer(0),timestep(0){
-    vm = new VM(config.program_file);
+    globalVM = vm = new VM(config.program_file);
     tracer = new Tracer(config.trace_output, config.scenario_number);
     brain = Brain::getBrain(config.problem, config.scenario_number, new VM(config.program_file));
 }
@@ -35,4 +37,9 @@ std::vector<pointF> Executer::getShipsPositions() const{
 
 int Executer::getShipsNumber() const{
     return brain->getShipsNumber();
+}
+
+VM* Executer::getCloneCurrentVM(){
+    VM* res = globalVM->getClone();
+    return res;
 }

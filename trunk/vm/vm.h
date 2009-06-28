@@ -14,11 +14,14 @@ class VM{
 public:
     VM(const std::string& file);
     PortMapping step(const PortMapping& input);
+    VM* getClone() const;
 
 private:
     static const int NUM_ADDR_BITS = 14;
     static const int MEM_SIZE = (1 << NUM_ADDR_BITS);
     static const int MAX_ADDR = MEM_SIZE - 1;
+
+    VM(const VM* that);
 
     std::vector<code_t> code_memory;
     std::vector<data_t> data_memory;
