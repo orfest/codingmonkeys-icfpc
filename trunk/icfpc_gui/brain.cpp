@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <iostream>
+#include <assert.h>
 
 #include "brain1.h"
 #include "brain2.h"
@@ -10,15 +11,18 @@
 #include "brain4.h"
 #include "vector.h"
 
+PortMapping Brain::prevInput = PortMapping();
+PortMapping Brain::prevResult = PortMapping();
+
 Brain* Brain::getBrain(int problem, int scenarioNumber){
     if (problem == 0) {
         return new B1(scenarioNumber);
-    } else if (problem == 1) {
+	} else if (problem == 1) {
         return new B2_2(scenarioNumber);
-    } else if (problem == 2) {
+    /*} else if (problem == 2) {
         return new B3(scenarioNumber);
     } else if (problem == 3) {
-        return new B4(scenarioNumber);
+        return new B4(scenarioNumber);*/
     } else {
         throw new std::exception("Unknown problem type");
     }
@@ -51,3 +55,46 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 	}
 	return actuators;
 }
+
+
+
+
+PortMapping Brain::step(const PortMapping& output)
+{
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+	if (timestep == 0){
+		assert(output.empty());
+		res[SCENARIO_PORT] = Brain::scenarioNumber;
+		state = WAITING;
+	}else if (timestep > 1){
+		if (state == WAITING){
+			if (operation_list.empty()){
+				_step(output);
+			}
+			if (!operation_list.empty()){
+				Operation* oper = operation_list.front();
+				state = RUNNING;
+				res = oper->step(output);
+			}
+		} else if (state == RUNNING) {
+			Operation* oper = operation_list.front();
+			res = oper->step(output);
+			if (oper->state == COMPLETE){
+				state = WAITING;
+				operation_list.pop();
+			}
+		}
+	}
+
+	prevResult = res;
+	prevInput = output;
+
+	timestep++;
+	return fuelOveruseFailsafe(output, res);
+}
+
+
