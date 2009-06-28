@@ -19,6 +19,7 @@ using namespace std;
 
 PortMapping Brain::prevInput = PortMapping();
 PortMapping Brain::prevResult = PortMapping();
+const double Brain::fuelEps = 1e-3;
 
 Brain::Brain(int sn, VM* vm_):scenarioNumber(sn),timestep(0),vm(vm_){}
 
@@ -30,7 +31,7 @@ Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
 	} else if (problem == 1) {
         return new B2_2(scenarioNumber, vm);
     } else if (problem == 2) {
-		return new B3_3(scenarioNumber, vm);
+        return new B3_3(scenarioNumber, vm);
     } else if (problem == 3) {
         return new B4(scenarioNumber, vm);
     } else {
@@ -59,7 +60,7 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 	Vector delta(actuators.find(VX_PORT)->second, actuators.find(VY_PORT)->second);
 	if (fuelAvailable < delta.length()) {
 		delta.normalize();
-		delta *= fuelAvailable;
+		delta *= fuelAvailable-fuelEps;
 		actuators[VX_PORT] = delta.x;
 		actuators[VY_PORT] = delta.y;
 	}

@@ -26,6 +26,7 @@ public:
 	static PortMapping prevInput;
 
 protected:
+    static const double fuelEps;
     Brain(int sn, VM* vm_);
     int scenarioNumber;
     int timestep;
