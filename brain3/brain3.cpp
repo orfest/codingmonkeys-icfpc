@@ -93,30 +93,10 @@ PortMapping B3::step(const PortMapping& output){
 
 	if (state == waitingJumpFrom && abs(rFromMax - curMeEarth.length()) < EPS) {
 		// jump to circular orbit (rFromMax), and immediately to target circular orbit (rToMax)
-		// this effectively transfers to elliptic (rFromMax, rToMax)
+		// this effectively transfers to elliptic orbit (rFromMax, rToMax)
 		hohmannTransfer(res, rFromMin, rFromMax, true, curMeEarth);
 		hohmannTransfer(res, rFromMax, rToMax, false, curMeEarth);
 
-		/*
-		double delta_v2 = sqrt(MU_CONST / rFromMax) * (1 - sqrt(2 * rFromMin / (rFromMin + rFromMax)));
-		Vector tangent(curMeEarth.y, -curMeEarth.x);
-		tangent.normalize();
-		Vector curVel = curMeEarth - Vector(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
-		clockwise = ( Vector::dotProduct(- curVel, tangent) > 0.0 );
-		if (!clockwise)
-			tangent = -tangent;
-		if (rFromMax > rToMax) { // flip direction here
-			delta_v2 = delta_v2 + 2 * curVel.length();
-			tangent = -tangent;
-			clockwise = !clockwise;
-		}
-
-		double delta_v1 = sqrt(MU_CONST / rFromMax) * (sqrt(2 * rToMax / (rFromMax + rToMax)) - 1);
-
-		Vector delta = tangent * (delta_v1 + delta_v2);
-		res[VX_PORT] += delta.x;
-		res[VY_PORT] += delta.y;
-		*/
 		state = jumpedFromCircular;
 	}
 
@@ -124,24 +104,6 @@ PortMapping B3::step(const PortMapping& output){
 		// transfer to circular (rToMax)
 		hohmannTransfer(res, rFromMax, rToMax, true, curMeEarth);
 
-		/*
-		double delta_v2 = sqrt(MU_CONST / rToMax) * (1 - sqrt(2 * rFromMax / (rFromMax + rToMax)));
-		Vector tangent(curMeEarth.y, -curMeEarth.x);
-		tangent.normalize();
-		Vector curVel = curMeEarth - Vector(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
-		if (!clockwise)
-			tangent = -tangent;
-		// TODO do not flip direction here!
-		if (rToMax > rFromMax) { // flip direction here
-			delta_v2 = delta_v2 + 2 * curVel.length();
-			tangent = -tangent;
-			clockwise = !clockwise;
-		}
-
-		Vector delta = tangent * delta_v2;
-		res[VX_PORT] += delta.x;
-		res[VY_PORT] += delta.y;
-		*/
 		state = waitingJumpTo;
 	}
 
@@ -212,8 +174,6 @@ PortMapping B3::step(const PortMapping& output){
 		state = following;
 		skipOtherStateChanges = true;
 	}
-
-	// TODO 
 
     prevResult = res;
     prevInput = output;
