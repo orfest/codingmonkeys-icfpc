@@ -10,7 +10,7 @@ static const double EPS = 0.1;
 
 B3::B3(int sn):Brain(sn) {}
 
-PortMapping B3::step(const PortMapping& output){
+PortMapping B3::_step(const PortMapping& output) {
 	/** /
     cout << output.find(EARTH_X)->second << endl;
     cout << output.find(EARTH_Y)->second << endl;
@@ -64,9 +64,29 @@ PortMapping B3::step(const PortMapping& output){
 
 		Vector tangentTarg(curTargEarth.y, -curTargEarth.x);
 		targClockwise = ( Vector::dotProduct(curTargVel, tangentTarg) > 0.0 );
+
+#if 0
+		// now we can estimate orbits
+		// note that this is used *instead* of actual measuring and automatically bypasses it
+		// though for now it is buggy
+		//Vector myAphelion, myPerihelion;
+		estimateOrbit(curMyVel, -startMeEarth, myAphelion, myPerihelion);
+		rFromMin = myAphelion.length();
+		rFromMax = myPerihelion.length();
+		rFromKnown = true;
+
+		//Vector targAphelion, targPerihelion;
+		estimateOrbit(curTargVel, -startTargEarth, targAphelion, targPerihelion);
+		rToMin = targPerihelion.length();
+		rToMax = targPerihelion.length();
+		rToMaxTargEarth = targPerihelion;
+		rToKnown = true;
+
+		state = waitingJumpFrom;
+#endif	
 	}
 
-	if (timestep > 0) {
+	if (timestep > 0 && state == measuring) {
 		if (!rFromKnown && timestep < ceil(1 + periodFrom)) {
 			if (curMeEarth.length() < rFromMin)
 				rFromMin = curMeEarth.length();
@@ -87,7 +107,7 @@ PortMapping B3::step(const PortMapping& output){
 			rToKnown = true;
 		}
 
-		if (state == measuring && rFromKnown && rToKnown)
+		if (rFromKnown && rToKnown)
 			state = waitingJumpFrom;
 	}
 
@@ -181,20 +201,28 @@ PortMapping B3::step(const PortMapping& output){
     return fuelOveruseFailsafe(output, res);
 }
 
-vector<pointF> B3::getShipsPositions() const{
+vector<pointF> B3::getShipsPositions() const {
     pointF p(-prevInput.find(EARTH_X)->second, -prevInput.find(EARTH_Y)->second);
     vector<pointF> res;
     res.push_back(p);
     pointF target( p.first + prevInput.find(TARGET_X)->second, p.second + prevInput.find(TARGET_Y)->second   );
     res.push_back(target);
+	
+	double alpha = (timestep % 2000) / 2000.0;
+	res.push_back(myAphelion * (1 - alpha) + myPerihelion * alpha);
+	//res.push_back(myPerihelion * (1 - alpha) + myAphelion * alpha);
+	res.push_back(targAphelion * (1 - alpha) + targPerihelion * alpha);
+	//res.push_back(targPerihelion * (1 - alpha) + targAphelion * alpha);
+
     return res;
 }
 
-int B3::getShipsNumber() const{
-    return 2;
+int B3::getShipsNumber() const {
+    return 2  +2;
 }
 
-void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, bool toCircular, Vector curMeEarth) {
+void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
+										bool toCircular, Vector curMeEarth) const {
 	double delta_v;
 	if (toCircular)
 		delta_v = sqrt(MU_CONST / toR) * (1 - sqrt(2 * fromR / (fromR + toR)));
@@ -209,4 +237,46 @@ void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, bool
 	Vector delta = tangent * delta_v;
 	actuators[VX_PORT] += delta.x;
 	actuators[VY_PORT] += delta.y;
+}
+
+void B3::estimateOrbit(const Vector & velocity, const Vector & position, 
+										Vector & aphelionPos, Vector & perihelionPos) const {
+	double r = position.length();
+	double energy = velocity.sqLength() / 2 - MU_CONST / r;
+	double sMjAxis = - MU_CONST / (2 * energy);
+	double l = Vector::crossProduct(position, velocity);
+	double alpha = l * l / MU_CONST;
+	double alphaR = 1 - alpha / r;
+	double sqCosThetas = 1 / (velocity.sqLength() * pow( (2 * r - alpha) / (l * alphaR), 2.0 ) + 1);
+	double cosThetas = sqrt(sqCosThetas);
+	double eccentricity = - alphaR / cosThetas;
+	double focusToCenter = eccentricity * sMjAxis;
+
+	double sqEccent = velocity.sqLength() * pow(alpha / l, 2) + pow(alphaR, 2);
+	assert(abs(sqrt(sqEccent) - eccentricity) < 0.0001);
+
+	// TODO is this correct in all cases (signs) ?
+	double thetas = acos(cosThetas);
+	double theta = getPolarAngle(position);
+	double theta0 = theta - thetas;
+	//theta0 = theta + thetas;
+
+	Vector dirToCenter = getVectorFromPolarAngle(theta0);
+	Vector center = dirToCenter * focusToCenter;
+	perihelionPos = center + dirToCenter * sMjAxis;
+	aphelionPos = center - dirToCenter * sMjAxis;
+}
+
+double B3::getPolarAngle(const Vector& v) const {
+    Vector norm(v);
+    norm.normalize();
+    double res = acos(norm.x);
+    if (norm.y < 0){
+        res = -res;
+    }
+    return res;
+}
+
+Vector B3::getVectorFromPolarAngle(double angle) const {
+	return Vector(cos(angle), sin(angle));
 }

@@ -9,7 +9,7 @@
 class B3 : public Brain{
 public:
     B3(int scenarioNumber);
-    virtual PortMapping step(const PortMapping& output);
+    virtual PortMapping _step(const PortMapping& output);
 
     virtual std::vector<pointF> getShipsPositions() const;
     virtual int getShipsNumber() const;
@@ -28,6 +28,8 @@ private:
 	double periodFrom;
 	double periodTo;
 	Vector rToMaxTargEarth;
+	Vector myAphelion, myPerihelion;
+	Vector targAphelion, targPerihelion;
 	enum State {measuring, 
 				waitingJumpFrom, 
 				jumpedFromCircular, 
@@ -44,7 +46,11 @@ private:
 	int steeringSteps;
 
 	void hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
-						bool toCircular, Vector curMeEarth);
+						bool toCircular, Vector curMeEarth) const;
+	void estimateOrbit(const Vector & velocity, const Vector & position, 
+						Vector & aphelionPos, Vector & perihelionPos) const;
+	double getPolarAngle(const Vector& v) const;
+	Vector getVectorFromPolarAngle(double angle) const;
 };
 
 #endif //BRAIN3_H

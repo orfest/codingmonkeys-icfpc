@@ -8,7 +8,7 @@
 class B4 : public Brain{
 public:
     B4(int scenarioNumber);
-    virtual PortMapping step(const PortMapping& output);
+    virtual PortMapping _step(const PortMapping& output);
 
     virtual std::vector<pointF> getShipsPositions() const;
     virtual int getShipsNumber() const;
