@@ -68,7 +68,7 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 PortMapping Brain::step(const PortMapping& output) {
 	// hack for Brain3 implementation and Brain4 stub !!!
-    if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
+    if (scenarioNumber / 1000 == 4) {
 		return _step(output);
     }
 
@@ -125,6 +125,7 @@ void Brain::simulateAndGetOrbits(){
     vector<int> minDistTime(numShips, -1);
     vector<int> done(numShips, 0);
     vector<double> startPolarAngle(numShips);
+    vector<Vector> prev(numShips);
 
     int toexamine = numShips;
     for (int t = 0; toexamine > 0 && t < 3000000; t++){
@@ -144,10 +145,12 @@ void Brain::simulateAndGetOrbits(){
             if (dist > maxDist[i] + eps){
                 maxDist[i] = dist;
                 maxDistTime[i] = t;
+                orbits[i].maxR = pos;
             }
             if (dist < minDist[i] - eps){
                 minDist[i] = dist;
                 minDistTime[i] = t;
+                orbits[i].minR = pos;
             }
             if (t > 1000){
                 double curPolarAngle = getPolarAngle(pos);
@@ -157,8 +160,10 @@ void Brain::simulateAndGetOrbits(){
                 if (abs(diffPolarAngle) < 0.002){
                     done[i] = 1;
                     toexamine--;
+                    orbits[i].clockwise = isClockwise(pos, prev[i]);
                 }
             }
+            prev[i] = pos;
         }
         if (t == 0){
             res[SCENARIO_PORT] = 0;
