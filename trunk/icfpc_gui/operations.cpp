@@ -413,6 +413,75 @@ PortMapping MeetShip::step(const PortMapping& output){
 	return res;
 }
 
+const double Pursuit::MAX_BURST_RATIO = 500.0;
+
+PortMapping Pursuit::step(const PortMapping & output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+	Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
+	if (timestep == 0) {
+		Operation::state = RUNNING;
+		
+		state = following;
+	} else {
+		bool skipOtherStateChanges = false;
+
+		Vector curMeEarth = Vector(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
+		Vector curTargEarth = curMeEarth - 
+			Vector(output.find(targXSensor)->second, output.find(targYSensor)->second);
+
+		if (state == following && (curMeEarth - curTargEarth).length() > 1000) {
+			// steer to the target
+			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+			Vector prevTargEarth = prevMeEarth - 
+					Vector(prevInput.find(targXSensor)->second, prevInput.find(targYSensor)->second);
+			Vector curTargVel = prevTargEarth - curTargEarth;
+			Vector curMeVel = prevMeEarth - curMeEarth;
+			Vector dirMeTarg = curMeEarth - curTargEarth; 
+
+			Vector deltaV = dirMeTarg / MAX_STEERING_STEPS + (curTargVel - curMeVel);
+			if (deltaV.length() > output.find(FUEL_PORT)->second / MAX_BURST_RATIO)
+				deltaV = deltaV.normalize() * output.find(FUEL_PORT)->second / MAX_BURST_RATIO;
+
+			res[VX_PORT] = deltaV.x;
+			res[VY_PORT] = deltaV.y;
+			state = steering;
+			steeringSteps = 0;
+			skipOtherStateChanges = true;
+		}
+
+		if (state == steering && !skipOtherStateChanges) {
+			// if we steer away - return to the pursuit
+			if (steeringSteps++ > MAX_STEERING_STEPS && (curMeEarth - curTargEarth).length() > 1000)
+				state = following;
+		}
+
+		if (state == steering && !skipOtherStateChanges && 
+									(curMeEarth - curTargEarth).length() < 500) {
+			// remove steering velocity component and continue pursuit
+			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+			Vector curMyVel = prevMeEarth - curMeEarth;
+
+			Vector prevTargEarth = prevMeEarth - 
+				Vector(prevInput.find(targXSensor)->second, prevInput.find(targYSensor)->second);
+			Vector curTargVel = prevTargEarth - curTargEarth;
+
+			Vector deltaV = curTargVel - curMyVel;
+			res[VX_PORT] = deltaV.x;
+			res[VY_PORT] = deltaV.y;
+			state = following;
+			skipOtherStateChanges = true;
+		}
+	}
+
+	prevInput = output;
+	timestep++;
+	return res;
+}
+
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
     long double a = (orbit.maxR - orbit.minR).length()*0.5;
     long double ea = (orbit.maxR + orbit.minR).length()*0.5;

@@ -34,8 +34,8 @@ Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
 	} else if (problem == 1) {
         return new B2_2(scenarioNumber, vm);
     } else if (problem == 2) {
-        //return new B3_3(scenarioNumber, vm);
-		return new B3(scenarioNumber, vm);
+        return new B3_3(scenarioNumber, vm);
+		//return new B3(scenarioNumber, vm);
     } else if (problem == 3) {
         return new B4(scenarioNumber, vm);
     } else if (problem == 4) {
@@ -74,7 +74,7 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 PortMapping Brain::step(const PortMapping& output) {
 	if (scenarioNumber / 1000 == 3) {	// Brain3 works apart from this scheme
-		return _step(output);
+		//return _step(output);
 	}
 
 	PortMapping res;
