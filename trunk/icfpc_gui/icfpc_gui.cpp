@@ -39,7 +39,7 @@ icfpc_gui::~icfpc_gui() {
 }
 
 void icfpc_gui::next(){
-    for (int i = 0; i < 10; i++){
+    for (int i = 0; i < 100; i++){
         if (!ex->nextStep()){
             timer->stop();
             break;

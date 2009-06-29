@@ -17,110 +17,104 @@ PortMapping B4_a::_step(const PortMapping& output){
 	res[VY_PORT] = 0;
 
 	if (step == 1){
-        int tnum = 1;
-		Orbit target;
         Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
-//		target.minR = curEarth;
-        Vector farShip(output.find(TARGETN_X(tnum))->second, output.find(TARGETN_Y(tnum))->second);
-        farShip -= curEarth;
-//      target.maxR = farShip;
-
-        double myRadius = curEarth.length();
-
         Vector prevEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
-        Vector prevFarShip(prevInput.find(TARGETN_X(tnum))->second, prevInput.find(TARGETN_Y(tnum))->second);
-        prevFarShip -= prevEarth;
+        Vector myMove(prevEarth-curEarth);
 
-        Vector shipMove(farShip - prevFarShip);
-        
-        Orbit farShipOrbit;
-        estimateOrbit(shipMove, farShip, farShipOrbit.minR, farShipOrbit.maxR);
+        Orbit myOrbit;
+        Orbit shipOrbit;
+	    Orbit target;
 
-        target.minR = Vector(farShipOrbit.maxR).normalize().operator*=(-myRadius);
-        target.maxR = farShipOrbit.maxR;
-        target.clockwise = false;
+        bool first = true;
+        estimateOrbit(myMove, -curEarth, myOrbit.minR, myOrbit.maxR);
+        for (int tnum = 6; tnum >= 0; tnum--){
 
-        static FreeFlyToCertainPoint flyToPoint;
-        flyToPoint.point = target.minR;
-        operation_list.push(static_cast<Operation*>(&flyToPoint));
+            // assume I'm on a circular
 
-        static CircleToElliptic cte1;
-        cte1.SetTarget(target);
-		operation_list.push(static_cast<Operation*>(&cte1));
+            Vector ship(output.find(TARGETN_X(tnum))->second, output.find(TARGETN_Y(tnum))->second);
+            ship -= curEarth;
+            Vector prevShip(prevInput.find(TARGETN_X(tnum))->second, prevInput.find(TARGETN_Y(tnum))->second);
+            prevShip -= prevEarth;
 
-        static FreeFly fly1;
-        fly1.transferTime = 5;
-        operation_list.push(static_cast<Operation*>(&fly1));
+            Vector shipMove(ship - prevShip);
+            estimateOrbit(shipMove, ship, shipOrbit.minR, shipOrbit.maxR);
 
-        static FlipDirection flip;
-		operation_list.push(static_cast<Operation*>(&flip));
+            target.minR = Vector(shipOrbit.maxR).normalize().operator*=(-myOrbit.minR.length());  // we are on a circular
+            target.maxR = shipOrbit.maxR;
+            target.clockwise = false;
 
-        static FreeFly fly2;
-        fly2.transferTime = 5;
-        operation_list.push(static_cast<Operation*>(&fly2));
+            FreeFlyToCertainPoint* flyToPoint = new FreeFlyToCertainPoint;
+            flyToPoint->point = target.minR;
+            operation_list.push(static_cast<Operation*>(flyToPoint));
 
-        double delta_v2;
-        double delta_v1;
-        {
-            double r1 = target.minR.length();
-            double r2 = target.maxR.length();
-            delta_v2 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));
+            CircleToElliptic* cte1 = new CircleToElliptic;
+            cte1->SetTarget(target);
+		    operation_list.push(static_cast<Operation*>(cte1));
+
+            FreeFly* fly1 = new FreeFly;
+            fly1->transferTime = 3;
+            operation_list.push(static_cast<Operation*>(fly1));
+
+            if (first){
+                FlipDirection* flip = new FlipDirection;
+	            operation_list.push(static_cast<Operation*>(flip));
+
+                FreeFly* fly2 = new FreeFly;
+                fly2->transferTime = 3;
+                operation_list.push(static_cast<Operation*>(fly2));
+
+                first = false;
+            }
+
+            double delta_v2;
+            double delta_v1;
+            {
+                double r1 = target.minR.length();
+                double r2 = target.maxR.length();
+                delta_v2 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));            
+                // fuel from current ellipse to circular
+            }
+            {
+                double r1 = shipOrbit.maxR.length();
+                double r2 = shipOrbit.minR.length();
+                delta_v1 = sqrt(MU_CONST / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
+                // fuel from current circular to ship's ellipse
+            }
+            delta_v2 -= 1.2*delta_v1;     // save some for binary search
+
+            Accelerate* acc = new Accelerate();
+            acc->setDelta(delta_v2);
+            operation_list.push(static_cast<Operation*>(acc));
+
+            MeetShip* meet = new MeetShip();
+            meet->setShip(tnum);
+            operation_list.push(static_cast<Operation*>(meet));
+
+            myOrbit = shipOrbit;
+            FreeFlyToCertainPoint* flyToPoint2 = new FreeFlyToCertainPoint;
+            flyToPoint2->point = myOrbit.minR;
+            operation_list.push(static_cast<Operation*>(flyToPoint2));
+
+            double delta_v3;
+            {
+                double r1 = myOrbit.minR.length();
+                double r2 = myOrbit.maxR.length();
+                delta_v3 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));            
+                // fuel from current ellipse to circular
+            }
+            Accelerate* acc = new Accelerate();
+            acc->setDelta(delta_v3);
+            operation_list.push(static_cast<Operation*>(acc));
+
+
+            EllipticToCircle* ec1 = new EllipticToCircle;
+            target.minR = myOrbit.minR;
+            target.maxR = myOrbit.maxR;
+            ec1->SetTarget(target);
+            operation_list.push(static_cast<Operation*>(ec1));
+
+            myOrbit.minR = -myOrbit.maxR;
         }
-        {
-            double r1 = farShipOrbit.maxR.length();
-            double r2 = farShipOrbit.minR.length();
-            delta_v1 = sqrt(MU_CONST / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
-        }
-        delta_v2 -= delta_v1;
-
-        static Accelerate acc;
-        acc.setDelta(delta_v2);
-        operation_list.push(static_cast<Operation*>(&acc));
-
-        static MeetShip meet;
-        meet.setShip(tnum);
-        operation_list.push(static_cast<Operation*>(&meet));
-
-	//} else if (!start) {
-	//	Orbit target;
-	//	Vector curEarth(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
-	//	//Vector curTarget(output.find(TARGETN_X(did))->second, output.find(TARGETN_Y(did))->second);
- //       Vector curTarget(output.find(MOON_X)->second, output.find(MOON_Y)->second);
-	//	curTarget += curEarth;
-	//	curEarth.normalize();
-	//	curTarget.normalize();
-	//	Vector prevEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
-	//	Vector moveDir = prevEarth + curEarth;
-	//	Vector tangent(-curEarth.y, curEarth.x);
-	//	tangent.normalize();
-	//	clockwise = ( Vector::dotProduct(moveDir, tangent) > 0.0 );
-	//	alp = acos(Vector::dotProduct(curEarth, curTarget));
-	//	if ((Vector::crossProduct(curEarth, curTarget) < 0.0 && !clockwise) ||
-	//		(Vector::crossProduct(curEarth, curTarget) > 0.0 && clockwise)){
-	//			alp = 2.0*M_PI - alp;
-	//	}
-	//	alp = alp / (2*M_PI);
-	//	r1 = sqrt(pow(output.find(EARTH_X)->second, 2) + pow(output.find(EARTH_Y)->second, 2));
-	//	rt = 0.0;
-	//	int i = 0;
-	//	while (rt < EARTH_RADIUS + 1000){
-	//		rt = r1 * (pow(8.0*pow((alp+i),2),1.0/3) - 1.0);
-	//		i++;
-	//	}
-	//	target.minR.x = r1;
-	//	target.minR.y = 0;
-	//	target.maxR.x = rt;
-	//	target.maxR.y = 0;
-	//	static CircleToElliptic el1;
-	//	el1.SetTarget(target);
-	//	operation_list.push(static_cast<Operation*>(&el1));
-	//	static FreeFly wait;
-	//	wait.transferTime = el1.GetTransferTime();
-	//	operation_list.push(static_cast<Operation*>(&wait));
-	//	static EllipticToCircle el2;
-	//	el2.SetTarget(target);
-	//	operation_list.push(static_cast<Operation*>(&el2));
- //       start = !start;
 	} 
 
 	step++;
