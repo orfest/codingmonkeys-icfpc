@@ -49,6 +49,15 @@ public:
 	double r2;
 };
 
+class CircleToEllipticFast : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+	double GetTransferTime();
+	double transferTime;
+	double r1;
+	double r2;
+};
+
 class EllipticToCircle : public Operation {
 public:
 	virtual PortMapping step(const PortMapping& output);
