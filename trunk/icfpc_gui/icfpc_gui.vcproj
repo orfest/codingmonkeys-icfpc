@@ -39,7 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=".\GeneratedFiles;&quot;$(QTDIR)\include&quot;;&quot;.\GeneratedFiles\$(ConfigurationName)&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;.;.\..\vm;.\..\include;.\..\brain1;.\..\brain2;.\..\brain3;.\..\brain4;.\..\brain2_2;.\..\brain3_3;"
+				Optimization="0"
+				AdditionalIncludeDirectories=".\GeneratedFiles;&quot;$(QTDIR)\include&quot;;&quot;.\GeneratedFiles\$(ConfigurationName)&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;.;.\..\vm;.\..\include;.\..\brain1;.\..\brain2;.\..\brain3;.\..\brain4;.\..\brain2_2;.\..\brain3_3;.\..\brain4_a"
 				PreprocessorDefinitions="UNICODE,WIN32,QT_THREAD_SUPPORT,QT_NO_DEBUG,NDEBUG,QT_CORE_LIB,QT_GUI_LIB"
 				RuntimeLibrary="2"
 				TreatWChar_tAsBuiltInType="false"
@@ -57,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=" qtmain.lib QtCore4.lib QtGui4.lib vm.lib brain1.lib brain2.lib brain3.lib brain4.lib brain2_2.lib brain3_3.lib"
+				AdditionalDependencies=" qtmain.lib QtCore4.lib QtGui4.lib vm.lib brain1.lib brain2.lib brain3.lib brain4.lib brain2_2.lib brain3_3.lib brain4_a.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="&quot;$(QTDIR)\lib&quot;;..\release"
 				GenerateDebugInformation="false"
@@ -109,7 +110,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\GeneratedFiles;&quot;$(QTDIR)\include&quot;;&quot;.\GeneratedFiles\$(ConfigurationName)&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;.;.\..\vm;.\..\include;.\..\brain1;.\..\brain2;.\..\brain3;.\..\brain4;.\..\brain2_2;.\..\brain3_3;"
+				AdditionalIncludeDirectories=".\GeneratedFiles;&quot;$(QTDIR)\include&quot;;&quot;.\GeneratedFiles\$(ConfigurationName)&quot;;&quot;$(QTDIR)\include\QtCore&quot;;&quot;$(QTDIR)\include\QtGui&quot;;.;.\..\vm;.\..\include;.\..\brain1;.\..\brain2;.\..\brain3;.\..\brain4;.\..\brain2_2;.\..\brain3_3;.\..\brain4_a"
 				PreprocessorDefinitions="UNICODE,WIN32,QT_THREAD_SUPPORT,QT_CORE_LIB,QT_GUI_LIB;"
 				RuntimeLibrary="3"
 				TreatWChar_tAsBuiltInType="false"
@@ -127,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies=" qtmaind.lib QtCored4.lib QtGuid4.lib vm.lib brain1.lib brain2.lib brain3.lib brain4.lib brain2_2.lib brain3_3.lib"
+				AdditionalDependencies=" qtmaind.lib QtCored4.lib QtGuid4.lib vm.lib brain1.lib brain2.lib brain3.lib brain4.lib brain2_2.lib brain3_3.lib brain4_a.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				AdditionalLibraryDirectories="&quot;$(QTDIR)\lib&quot;;..\debug"
 				GenerateDebugInformation="true"

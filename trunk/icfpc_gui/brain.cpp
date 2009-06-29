@@ -11,6 +11,7 @@
 #include "brain3.h"
 #include "brain3_3.h"
 #include "brain4.h"
+#include "brain4_a.h"
 #include "vector.h"
 
 #include "vm.h"
@@ -37,6 +38,8 @@ Brain* Brain::getBrain(int problem, int scenarioNumber, VM* vm){
 		return new B3(scenarioNumber, vm);
     } else if (problem == 3) {
         return new B4(scenarioNumber, vm);
+    } else if (problem == 4) {
+        return new B4_a(scenarioNumber, vm);
     } else {
         throw new std::exception("Unknown problem type");
     }
@@ -71,10 +74,16 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 PortMapping Brain::step(const PortMapping& output) {
 	// hack for Brain4 stub !!!
-	// to use Brain3 (B3) with less bugs add similar hack
-    if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
-		return _step(output);
-    }
+//<<<<<<< .mine
+  //  if (scenarioNumber / 1000 == 4) {
+		//return _step(output);
+  //  }
+//=======
+//	// to use Brain3 (B3) with less bugs add similar hack
+//    if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
+//		return _step(output);
+//    }
+//>>>>>>> .r90
 
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -86,7 +95,7 @@ PortMapping Brain::step(const PortMapping& output) {
 		res[SCENARIO_PORT] = Brain::scenarioNumber;
 		state = WAITING;
 
-        simulateAndGetOrbits();
+        //simulateAndGetOrbits();
 
 	}else if (timestep > 1){
 		do {
@@ -171,7 +180,7 @@ void Brain::simulateAndGetOrbits(){
                 double diffPolarAngle = curPolarAngle - startPolarAngle[i];
                 while (diffPolarAngle < -M_PI) diffPolarAngle += 2*M_PI;
                 while (diffPolarAngle > M_PI) diffPolarAngle -= 2*M_PI;
-                if (abs(diffPolarAngle) < 0.002){
+                if (abs(diffPolarAngle) < 0.0002){
                     done[i] = 1;
                     toexamine--;
                     orbits[i].clockwise = isClockwise(pos, prev[i]);

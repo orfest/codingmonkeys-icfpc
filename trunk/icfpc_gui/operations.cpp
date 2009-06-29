@@ -6,6 +6,7 @@
 
 #include "vector.h"
 #include "vm.h"
+#include "executer.h"
 
 PortMapping Hohman::step(const PortMapping& output){
 	PortMapping res;
@@ -179,7 +180,7 @@ PortMapping FlipDirection::step(const PortMapping& output){
 	timestep++;
 	return res;
 }
-#if 0
+
 PortMapping Accelerate::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -209,7 +210,7 @@ PortMapping Accelerate::step(const PortMapping& output){
 	timestep++;
 	return res;
 }
-#endif
+
 PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -227,7 +228,6 @@ PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 	return res;
 }
 
-#if 0
 PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -265,7 +265,86 @@ PortMapping MeetShip::step(const PortMapping& output){
     Vector pos(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     Vector toShip(output.find(TARGETN_X(ship))->second, output.find(TARGETN_Y(ship))->second);
     if (timestep == 3){
-        
+        Vector move(pos - prev);
+        //double r = output.find(FUEL_PORT)->second;
+        //l = r;
+        //if (l > move.length()){
+        //    l = move.length();
+        //}
+        //l = -l;
+        double l = move.length()*(-0.75);
+        double r = move.length()*(0.75);
+        bool found = false;
+        while (r - l > 0.001 && !found){
+            VM* vm = Executer::getCloneCurrentVM();
+            PortMapping in;
+            in[SCENARIO_PORT] = 0;
+            double m = (r+l)*0.5;
+            in[VX_PORT] = (move.normalize()*m).x;
+            in[VY_PORT] = (move.normalize()*m).y;
+            PortMapping out = vm->step(in);
+            if (out.find(SCORE_PORT)->second != 0) {
+                assert(0);
+            }
+            in[VX_PORT] = 0;
+            in[VY_PORT] = 0;
+            bool good = false;
+            double prevDist = 0;
+            double curDist = 0;
+            Vector minPos;
+            Vector minSPos;
+            double minDist = 1e20;
+            for (int t = 0; t < 2000000; t++){
+                out = vm->step(in);
+                if (out.find(SCORE_PORT)->second != 0) break;
+                Vector toShipD(out.find(TARGETN_X(ship))->second, out.find(TARGETN_Y(ship))->second);
+                double dist = toShipD.length();
+                if (t > 3){
+                    if (dist < 1000){
+                        found = true;
+                        good = true;
+                        break;
+                    }
+                    if (dist > curDist && curDist < prevDist){
+                        good = true;
+                        break;
+                    }
+                    if (dist < minDist){
+                        Vector pos(-out.find(EARTH_X)->second, -out.find(EARTH_Y)->second);
+                        minDist = dist;
+                        minPos = pos;
+                        minSPos = pos+toShipD;
+                    }
+                }
+                prevDist = curDist;
+                curDist = dist;
+            }
+            if (!found && good){
+                double r1 = minPos.length();
+                double r2 = minSPos.length();
+                if (r1 < r2){
+                    l = m;
+                } else {
+                    r = m;
+                }
+            } else if (!found){
+                assert(0);
+                l = m;
+            }
+            delete vm;
+        }
+        if (found){
+            double m = (r+l)*0.5;
+            Vector move(pos - prev);
+            Vector acc(move);
+            acc.normalize();
+            acc *= m;
+            res[VX_PORT] = acc.x;
+            res[VY_PORT] = acc.y;
+        } else {
+            assert(0);
+        }
+        int i = 1;
     }
 
     double dist = toShip.length();
@@ -277,7 +356,6 @@ PortMapping MeetShip::step(const PortMapping& output){
 	timestep++;
 	return res;
 }
-#endif
 
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
     long double a = (orbit.maxR - orbit.minR).length()*0.5;

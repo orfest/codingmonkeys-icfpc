@@ -88,6 +88,24 @@ private:
     Vector prev;
 };
 
+class Accelerate : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+    void setDelta(double d) { delta = d; }
+private:
+    double delta;
+    Vector prev;
+};
+
+class MeetShip : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+    void setShip(int d) { ship = d; }
+private:
+    int ship;
+    Vector prev;
+};
+
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);
 
 

@@ -45,10 +45,10 @@ protected:
 	PortMapping & fuelOveruseFailsafe(const PortMapping & sensors, PortMapping & actuators);
     int estimateTimeToPoint(const Vector& point) const;
     int estimateTimeToPerihelion(const Orbit& orbit) const{
-        return estimateTimeToPoint(orbit.maxR);
+        return estimateTimeToPoint(orbit.minR);
     }
     int estimateTimeToAphelion(const Orbit& orbit) const{
-        return estimateTimeToPoint(orbit.minR);
+        return estimateTimeToPoint(orbit.maxR);
     }
 
 	void estimateOrbit(const Vector & velocity, const Vector & position, 
