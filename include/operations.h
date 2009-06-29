@@ -118,6 +118,22 @@ private:
     bool searchSuccessful;
 };
 
+class Pursuit : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+	void setPursuitTargetSensors(int xSensor, int ySensor) { targXSensor = xSensor; targYSensor = ySensor; }
+
+	static const double MAX_BURST_RATIO;
+	static const int MAX_STEERING_STEPS = 250;
+private:
+	int targXSensor;
+	int targYSensor;
+	int steeringSteps;
+	PortMapping prevInput;
+	enum State {following, steering} state;
+};
+
+
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);
 
 

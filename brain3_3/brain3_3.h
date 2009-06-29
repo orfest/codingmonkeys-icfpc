@@ -19,6 +19,8 @@ private:
     PortMapping prevResult;
     PortMapping prevInput;
 	int step;
+
+	void getOrbits(const PortMapping & sensors);
 };
 
 #endif //BRAIN3_H
