@@ -88,7 +88,7 @@ private:
     Vector prev;
 };
 
-int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);
+double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);
 
 
 
