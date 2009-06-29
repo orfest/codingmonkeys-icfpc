@@ -22,6 +22,7 @@ enum STATE{
 
 class Operation{
 public:
+    Operation():timestep(0),clockwise(false),state(WAITING),target(){}
 	virtual PortMapping step(const PortMapping& output) = 0;
 	int timestep;
 	bool clockwise;
@@ -99,11 +100,13 @@ private:
 
 class MeetShip : public Operation {
 public:
+    MeetShip():Operation(),searchSuccessful(false),ship(-1){}
 	virtual PortMapping step(const PortMapping& output);
     void setShip(int d) { ship = d; }
 private:
     int ship;
     Vector prev;
+    bool searchSuccessful;
 };
 
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);

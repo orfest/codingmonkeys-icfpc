@@ -8,6 +8,8 @@
 #include "vm.h"
 #include "executer.h"
 
+using namespace std;
+
 PortMapping Hohman::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -62,7 +64,8 @@ PortMapping CircleToElliptic::step(const PortMapping& output){
 	res[VY_PORT] = 0;
 
 	if (timestep == 0) {
-		state = RUNNING;
+        std::cout << "Circle To Elliptic" << target.minR.length() << " : " << target.maxR.length() << endl;
+        state = RUNNING;
 		r1 = sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
 		r2 = sqrt(pow(target.maxR.x, 2) + pow(target.maxR.y, 2));
 
@@ -107,10 +110,10 @@ PortMapping EllipticToCircle::step(const PortMapping& output){
 	res[VY_PORT] = 0;
 
 	if (timestep == 0) {
+        std::cout << "Elliptic to Circle : " << target.minR.length() << " : " << target.maxR.length() << endl;
 		state = RUNNING;
-		r2 = sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
-		r1 = sqrt(pow(target.maxR.x, 2) + pow(target.maxR.y, 2));
-
+		r2 = target.minR.length();
+		r1 = target.maxR.length();//sqrt(pow(target.maxR.x, 2) + pow(target.maxR.y, 2));
 
 		double delta_v2 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));
 		Vector prevEarth(Brain::prevInput.find(EARTH_X)->second, Brain::prevInput.find(EARTH_Y)->second);
@@ -144,6 +147,10 @@ PortMapping FreeFly::step(const PortMapping& output){
 	res[VX_PORT] = 0;
 	res[VY_PORT] = 0;
 
+    if (timestep == 0){
+        std::cout << "Free Fly for " << transferTime << endl;
+    }
+
 	if (timestep == ceil(transferTime)) {
 		assert(ceil(transferTime) > 1);
 		state = COMPLETE;
@@ -161,6 +168,7 @@ PortMapping FlipDirection::step(const PortMapping& output){
 
     if (timestep == 0){
         state = RUNNING;
+        std::cout << "Flip Direction" << endl;
         prev = Vector(
             -output.find(EARTH_X)->second,
             -output.find(EARTH_Y)->second
@@ -189,6 +197,7 @@ PortMapping Accelerate::step(const PortMapping& output){
 
     if (timestep == 0){
         state = RUNNING;
+        std::cout << "Accelerate: delta: " << delta << endl;
         prev = Vector(
             -output.find(EARTH_X)->second,
             -output.find(EARTH_Y)->second
@@ -238,6 +247,7 @@ PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
     double dist = (position-point).length();
     if (timestep == 0){
         state = RUNNING;
+        std::cout << "Free Fly to Certain Point: X: " << point.x << " Y: " << point.y << endl;
     } else if (timestep > 1){
         if (dist < 1000){
             state = COMPLETE;
@@ -259,12 +269,21 @@ PortMapping MeetShip::step(const PortMapping& output){
 	res[VY_PORT] = 0;
 
     if (timestep == 0){
+        std::cout << "Meet Ship " << ship << endl;
         state = RUNNING;
     }
 
     Vector pos(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     Vector toShip(output.find(TARGETN_X(ship))->second, output.find(TARGETN_Y(ship))->second);
-    if (timestep == 3){
+
+    double dist = toShip.length();
+    if (dist < 1000){
+        state = COMPLETE;
+        searchSuccessful = true;
+    }
+
+    if (!searchSuccessful && timestep > 3/* && dist < 50000000*/){
+        cout << "Searching, dist " << dist << endl;
         Vector move(pos - prev);
         //double r = output.find(FUEL_PORT)->second;
         //l = r;
@@ -272,19 +291,26 @@ PortMapping MeetShip::step(const PortMapping& output){
         //    l = move.length();
         //}
         //l = -l;
-        double l = move.length()*(-0.75);
-        double r = move.length()*(0.75);
+        double l = move.length()*(-0.9);
+        double r = move.length()*(5.0);
         bool found = false;
-        while (r - l > 0.001 && !found){
+        double veryMinDist = 1e20;
+        while (r - l > 0.1 && !found){
             VM* vm = Executer::getCloneCurrentVM();
             PortMapping in;
             in[SCENARIO_PORT] = 0;
             double m = (r+l)*0.5;
             in[VX_PORT] = (move.normalize()*m).x;
             in[VY_PORT] = (move.normalize()*m).y;
+
             PortMapping out = vm->step(in);
             if (out.find(SCORE_PORT)->second != 0) {
-                assert(0);
+                if (out.find(SCORE_PORT)->second < 0){
+                    r = m;
+                    continue;
+                } else {
+                    assert(0);
+                }
             }
             in[VX_PORT] = 0;
             in[VY_PORT] = 0;
@@ -319,6 +345,7 @@ PortMapping MeetShip::step(const PortMapping& output){
                 prevDist = curDist;
                 curDist = dist;
             }
+            veryMinDist = min(minDist, veryMinDist);
             if (!found && good){
                 double r1 = minPos.length();
                 double r2 = minSPos.length();
@@ -328,7 +355,6 @@ PortMapping MeetShip::step(const PortMapping& output){
                     r = m;
                 }
             } else if (!found){
-                assert(0);
                 l = m;
             }
             delete vm;
@@ -341,15 +367,12 @@ PortMapping MeetShip::step(const PortMapping& output){
             acc *= m;
             res[VX_PORT] = acc.x;
             res[VY_PORT] = acc.y;
+            searchSuccessful = true;
         } else {
-            assert(0);
+            cout << "Not found\nMin distance: " << veryMinDist << endl;
+            //startSearching++;
         }
         int i = 1;
-    }
-
-    double dist = toShip.length();
-    if (dist < 1000){
-        state = COMPLETE;
     }
 
     prev = pos;
