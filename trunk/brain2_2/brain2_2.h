@@ -18,21 +18,11 @@ public:
 
 private:
 	int step;
-	double me_r;
 	double alp;
-	double that_r;
-	double transferTime;
-	double transferTime2;
 	double r1;
 	double r2;
 	double rt;
 	bool clockwise;
-	double secondparttime;
-	bool me_clockwise;
-    bool that_clockwise;
-    bool needTurnAround;
-    int startTime;
-    double delta_v1;
 
     double getAngle(const Vector& v) const;
 };

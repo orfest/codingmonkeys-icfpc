@@ -308,6 +308,7 @@ PortMapping MeetShip::step(const PortMapping& output){
 
     Vector pos(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
     Vector toShip(output.find(TARGETN_X(ship))->second, output.find(TARGETN_Y(ship))->second);
+    Vector move(pos-prev);
 
     double dist = toShip.length();
     if (dist < 1000){
@@ -315,7 +316,8 @@ PortMapping MeetShip::step(const PortMapping& output){
         searchSuccessful = true;
     }
 
-    if (!searchSuccessful && timestep > 3/* && dist < 50000000*/){
+    if (!searchSuccessful && (timestep % 50) == 3 && dist < 50000000 && 
+        Vector::dotProduct(toShip, move) > 0 && output.find(FUEL_PORT)->second > 1000){
         cout << "Searching, dist " << dist << endl;
         Vector move(pos - prev);
         //double r = output.find(FUEL_PORT)->second;
@@ -324,11 +326,11 @@ PortMapping MeetShip::step(const PortMapping& output){
         //    l = move.length();
         //}
         //l = -l;
-        double l = move.length()*(-0.9);
+        double l = move.length()*(-0.5);
         double r = move.length()*(5.0);
         bool found = false;
         double veryMinDist = 1e20;
-        while (r - l > 0.1 && !found){
+        while (r - l > 1 && !found){
             VM* vm = Executer::getCloneCurrentVM();
             PortMapping in;
             in[SCENARIO_PORT] = 0;

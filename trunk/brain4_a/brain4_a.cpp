@@ -28,8 +28,9 @@ PortMapping B4_a::_step(const PortMapping& output){
         bool first = true;
         estimateOrbit(myMove, -curEarth, myOrbit.minR, myOrbit.maxR);
 
-        for (int tnum = 1; tnum < 11; tnum++){
-
+        int nums[11] = {1,2,4,5,6,7,8,9,0,10};
+        for (int ktnum = 0; ktnum < 11; ktnum++){
+            int tnum = nums[ktnum];
             // assume I'm on a circular
 
             Vector ship(output.find(TARGETN_X(tnum))->second, output.find(TARGETN_Y(tnum))->second);
