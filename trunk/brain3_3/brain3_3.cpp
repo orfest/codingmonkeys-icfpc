@@ -46,17 +46,21 @@ PortMapping B3_3::_step(const PortMapping& output){
 		Orbit target;
 		target.minR = orbits[0].minR;
 		target.maxR = orbits[1].minR;
-		double alp = -6685;
-		double r0 = sqrt(pow(target.maxR.x,2) + pow(target.maxR.y,2));
+		double alp = -87.5;
+		double r0 = sqrt(pow(orbits[1].minR.x,2) + pow(orbits[1].minR.y,2));
 		double r1 = sqrt(pow(orbits[1].maxR.x,2) + pow(orbits[1].maxR.y,2));
-		double rt = pow( MU_CONST*pow(alp/(2.0*M_PI),2.0) ,1.0/3) - r0;
-		if (rt < EARTH_RADIUS + 10000){
-			int i = 1;
-			while (rt < EARTH_RADIUS + 10000){
-				rt = pow( MU_CONST*( pow(
-					alp/(2.0*M_PI) + 2.0*i*M_PI*sqrt( pow( (r0+r1)/2.0,3.0 )/MU_CONST ),2.0 ) ) ,1.0/3) - r0;
-				i++;
-			}
+
+		double t = alp;//2.0*M_PI*sqrt(pow(r0+r1,3.0)/(8.0*MU_CONST)) - 87.5;
+		double at3 = MU_CONST*pow(t/(2.0*M_PI),2.0);
+		double at = pow(at3,1.0/3.0);
+		double rt = 2.0*at - r0;
+		int i = 1;
+		while (rt < EARTH_RADIUS + 1000){
+			t = i*2.0*M_PI*sqrt(pow(r0+r1,3.0)/(8.0*MU_CONST)) + alp;
+			at3 = MU_CONST*pow(t/(2.0*M_PI),2.0);
+			at = pow(at3,1.0/3.0);
+			rt = 2.0*at - r0;
+			i++;
 		}
 		target.minR.x = r0;
 		target.minR.y = 0;
