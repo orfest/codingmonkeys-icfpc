@@ -73,17 +73,9 @@ PortMapping & Brain::fuelOveruseFailsafe(const PortMapping & sensors, PortMappin
 
 
 PortMapping Brain::step(const PortMapping& output) {
-	// hack for Brain4 stub !!!
-//<<<<<<< .mine
-  //  if (scenarioNumber / 1000 == 4) {
-		//return _step(output);
-  //  }
-//=======
-//	// to use Brain3 (B3) with less bugs add similar hack
-//    if (scenarioNumber / 1000 == 3 || scenarioNumber / 1000 == 4) {
-//		return _step(output);
-//    }
-//>>>>>>> .r90
+	if (scenarioNumber / 1000 == 3) {	// Brain3 works apart from this scheme
+		return _step(output);
+	}
 
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
