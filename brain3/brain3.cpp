@@ -6,10 +6,10 @@
 
 using namespace std;
 
-static const double EPS = 5000.0;
+static const double EPS = 10000.0;
 static const double TIME_LIMIT = 3e6;
-static const double MAX_BURST_RATIO = 20.0;
-static const int MAX_STEERING_STEPS = 50;
+static const double MAX_BURST_RATIO = 500.0;
+static const int MAX_STEERING_STEPS = 250;
 
 B3::B3(int sn, VM* vm):Brain(sn, vm){}
 
@@ -82,6 +82,12 @@ PortMapping B3::_step(const PortMapping& output) {
 		rToMaxTargEarth = targPerihelion;
 		rToKnown = true;
 
+		// compensate for circle orbits
+		if (abs(rFromMax - rFromMin) < EPS)
+			rFromMax = rFromMin = curMeEarth.length();
+		if (abs(rToMax - rToMin) < EPS)
+			rToMax = rToMin = curTargEarth.length();
+
 		state = waitingJumpFrom;
 #endif	
 
@@ -133,14 +139,16 @@ PortMapping B3::_step(const PortMapping& output) {
 			state = waitingJumpFrom;
 	}
 
+#if 0
+	// this attempts to switch to pursuit from the beggining if we do not have much time
 	if (state == waitingJumpFrom && periodTo + periodFrom >= TIME_LIMIT / 6 &&
 		getPhaseDifference(-curMeEarth, -curTargEarth) < 0.1) {
 
 		state = following;
 	}
+#endif
 
 	if (state == waitingJumpFrom && isPhaseWithinEpsCircleAware(-curMeEarth, myPerihelion, myAphelion)) {
-		// !!! && abs(rFromMax - curMeEarth.length()) < 1000 * EPS) {
 		// jump to circular orbit (rFromMax), and immediately to target circular orbit (rToMax)
 		// this effectively transfers to elliptic orbit (rFromMax, rToMax)
 		hohmannTransfer(res, rFromMin, rFromMax, true, curMeEarth);
@@ -151,7 +159,6 @@ PortMapping B3::_step(const PortMapping& output) {
 	}
 
 	if (state == jumpedFromCircular && isPhaseWithinEpsCircleAware(-curMeEarth, -jumpFromCircPos, Vector() )) {
-		// !!! && abs(rToMax - curMeEarth.length()) < 1000 * EPS) {
 		// transfer to circular (rToMax)
 		hohmannTransfer(res, rFromMax, rToMax, true, curMeEarth);
 
@@ -159,26 +166,31 @@ PortMapping B3::_step(const PortMapping& output) {
 	}
 
 	if (state == waitingJumpTo && isPhaseWithinEpsCircleAware(-curMeEarth, targPerihelion, targAphelion)) {
-		// !!! && (curMeEarth - rToMaxTargEarth).length() < 50000 * EPS) {
 		// transfer to elliptic (rToMin, rToMax)
 		hohmannTransfer(res, rToMax, rToMin, false, curMeEarth);
 
-		if (clockwise == targClockwise) {	// flip direction
-			Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
-			Vector curMyVel = prevMeEarth - curMeEarth;
-			Vector curDeltaV(res[VX_PORT], res[VY_PORT]);
-			Vector deltaV = - curMyVel * 2 - curDeltaV;
+		if (!( abs(getPhaseDifference(-curMeEarth, -curTargEarth)) < 0.001) ) {
+			if (clockwise == targClockwise) {	// flip direction
+				Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+				Vector curMyVel = prevMeEarth - curMeEarth;
+				Vector curDeltaV(res[VX_PORT], res[VY_PORT]);
+				Vector deltaV = - curMyVel * 2 - curDeltaV;
 
-			res[VX_PORT] = deltaV.x;
-			res[VY_PORT] = deltaV.y;
-			clockwise = !clockwise;
+				res[VX_PORT] = deltaV.x;
+				res[VY_PORT] = deltaV.y;
+				clockwise = !clockwise;
+			}
+
+			state = countering;
+		} else if (clockwise == targClockwise) {
+			state = following;
+			skipOtherStateChanges = true;
+		} else {
+			state = countering;
 		}
-
-		state = countering;
 	}
 
 	if (state == countering && abs(getPhaseDifference(-curMeEarth, -curTargEarth)) < 0.001) {
-		// !!! && (curMeEarth - curTargEarth).length() < 20000) {
 		// flip direction
 		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
 		Vector curMyVel = prevMeEarth - curMeEarth;
@@ -196,8 +208,14 @@ PortMapping B3::_step(const PortMapping& output) {
 	if (state == following && !skipOtherStateChanges && 
 								(curMeEarth - curTargEarth).length() > 1000) {
 		// steer to the target
-		Vector dirMeTarg = curMeEarth - curTargEarth;
-		Vector deltaV = dirMeTarg * 0.01;
+		Vector prevMeEarth(prevInput.find(EARTH_X)->second, prevInput.find(EARTH_Y)->second);
+		Vector prevTargEarth = prevMeEarth - 
+							Vector(prevInput.find(SATELLITE_X)->second, prevInput.find(SATELLITE_Y)->second);
+		Vector curTargVel = prevTargEarth - curTargEarth;
+		Vector curMeVel = prevMeEarth - curMeEarth;
+		Vector dirMeTarg = curMeEarth - curTargEarth; 
+
+		Vector deltaV = dirMeTarg / MAX_STEERING_STEPS + (curTargVel - curMeVel);
 		if (deltaV.length() > output.find(FUEL_PORT)->second / MAX_BURST_RATIO)
 			deltaV = deltaV.normalize() * output.find(FUEL_PORT)->second / MAX_BURST_RATIO;
 
@@ -259,6 +277,9 @@ int B3::getShipsNumber() const {
 
 void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
 										bool toCircular, Vector curMeEarth) const {
+	assert( toCircular || abs(curMeEarth.length() - fromR) < EPS);
+	assert(!toCircular || abs(curMeEarth.length() -   toR) < EPS);
+
 	double delta_v;
 	if (toCircular)
 		delta_v = sqrt(MU_CONST / toR) * (1 - sqrt(2 * fromR / (fromR + toR)));
