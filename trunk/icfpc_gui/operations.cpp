@@ -240,8 +240,11 @@ double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) 
 
     long double A = pow(((1+e)/(1-e)),1);
 
-    long double tnp2 = tan(phi*0.5);
-    long double beta = tnp2 / sqrt(A);
+    long double cosphi2 = pow(cos(phi*0.5),2);
+    long double cosb2 = A*cosphi2 / (1 + (A-1)*cosphi2);
+    long double beta = acos(sqrt(cosb2));
+//   long double tnp2 = tan(phi*0.5);
+//    long double beta = tnp2 / sqrt(A);
 
     long double pre = 2 / (pow((1-e),2) * sqrt(A));
     long double sum1 = (-1+(1/A))*0.25*sin(2*beta);
