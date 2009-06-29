@@ -233,18 +233,6 @@ void Brain::estimateOrbit(const Vector & velocity, const Vector & position,
 	assert(velocity.length() > 1e-3);
 	assert(position.length() > 1e-3);
 
-	struct Vector3D {
-		double x, y, z;
-		Vector3D(double x = 0.0, double y = 0.0, double z = 0.0) : x(x), y(y), z(z) {}
-		Vector3D(const Vector3D & vec) : x(vec.x), y(vec.y), z(vec.z) {}
-		Vector3D(const Vector & vec) : x(vec.x), y(vec.y), z(0.0) {}
-		static Vector3D crossProduct(const Vector3D & a, const Vector3D & b) {
-			return Vector3D(a.y * b.z - a.z * b.y, 
-							a.z * b.x - a.x * b.z, 
-							a.x * b.y - a.y * b.x);
-		}
-	};
-
 	Vector3D r(position);
 	Vector3D v(velocity);
 	Vector3D e = Vector3D::crossProduct(v, Vector3D::crossProduct(r, v));
@@ -285,7 +273,7 @@ double Brain::getPhaseDifference(const Vector & a, const Vector & b) const {
 		return angA - (angB + 2*M_PI);
 	else if (angA - angB >= 0)
 		return angA - angB;
-	else if (angA - angB <= -M_PI)
+	else if (angA - angB < -M_PI)
 		return angA + 2*M_PI - angB;
 	else
 		return angA - angB;
