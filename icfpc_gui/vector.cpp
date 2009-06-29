@@ -99,3 +99,9 @@ double Vector::dotProduct(const Vector & a, const Vector & b) {
 double Vector::crossProduct(const Vector & a, const Vector & b) {
 	return a.x * b.y - a.y * b.x;
 }
+
+Vector3D Vector3D::crossProduct(const Vector3D & a, const Vector3D & b) {
+	return Vector3D(a.y * b.z - a.z * b.y, 
+					a.z * b.x - a.x * b.z, 
+					a.x * b.y - a.y * b.x);
+}

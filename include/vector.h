@@ -40,4 +40,13 @@ public:
 	static double crossProduct(const Vector & a, const Vector & b);
 };
 
+struct Vector3D {
+	double x, y, z;
+	Vector3D(double x = 0.0, double y = 0.0, double z = 0.0) : x(x), y(y), z(z) {}
+	Vector3D(const Vector3D & vec) : x(vec.x), y(vec.y), z(vec.z) {}
+	Vector3D(const Vector & vec) : x(vec.x), y(vec.y), z(0.0) {}
+	static Vector3D crossProduct(const Vector3D & a, const Vector3D & b);
+};
+
+
 #endif
