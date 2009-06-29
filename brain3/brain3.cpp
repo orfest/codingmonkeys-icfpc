@@ -262,17 +262,19 @@ vector<pointF> B3::getShipsPositions(const PortMapping& output) const {
     pointF target( p.first + output.find(TARGET_X)->second, p.second + output.find(TARGET_Y)->second   );
     res.push_back(target);
 	
+	/** /
 	double alpha = (timestep % 2001) / 2000.0;
 	res.push_back(myAphelion * (1 - alpha) + myPerihelion * alpha);
 	//res.push_back(myPerihelion * (1 - alpha) + myAphelion * alpha);
 	res.push_back(targAphelion * (1 - alpha) + targPerihelion * alpha);
 	//res.push_back(targPerihelion * (1 - alpha) + targAphelion * alpha);
+	//*/
 
     return res;
 }
 
 int B3::getShipsNumber() const {
-    return 2  +2;
+    return 2; //  +2;
 }
 
 void B3::hohmannTransfer(PortMapping & actuators, double fromR, double toR, 
