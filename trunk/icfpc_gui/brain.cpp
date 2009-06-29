@@ -285,7 +285,7 @@ double Brain::getPhaseDifference(const Vector & a, const Vector & b) const {
 		return angA - (angB + 2*M_PI);
 	else if (angA - angB >= 0)
 		return angA - angB;
-	else if (angA - angB >= -M_PI)
+	else if (angA - angB <= -M_PI)
 		return angA + 2*M_PI - angB;
 	else
 		return angA - angB;
