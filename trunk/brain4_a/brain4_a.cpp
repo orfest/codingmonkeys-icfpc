@@ -27,7 +27,8 @@ PortMapping B4_a::_step(const PortMapping& output){
 
         bool first = true;
         estimateOrbit(myMove, -curEarth, myOrbit.minR, myOrbit.maxR);
-        for (int tnum = 6; tnum >= 0; tnum--){
+
+        for (int tnum = 1; tnum < 11; tnum++){
 
             // assume I'm on a circular
 
@@ -80,7 +81,7 @@ PortMapping B4_a::_step(const PortMapping& output){
                 delta_v1 = sqrt(MU_CONST / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
                 // fuel from current circular to ship's ellipse
             }
-            delta_v2 -= 1.2*delta_v1;     // save some for binary search
+            delta_v2 -= delta_v1;     // do not! save some for binary search
 
             Accelerate* acc = new Accelerate();
             acc->setDelta(delta_v2);
@@ -102,9 +103,9 @@ PortMapping B4_a::_step(const PortMapping& output){
                 delta_v3 = sqrt(MU_CONST / r2) * (1 - sqrt(2 * r1 / (r1 + r2)));            
                 // fuel from current ellipse to circular
             }
-            Accelerate* acc = new Accelerate();
-            acc->setDelta(delta_v3);
-            operation_list.push(static_cast<Operation*>(acc));
+            Accelerate* acc1 = new Accelerate();
+            acc1->setDelta(delta_v3);
+            operation_list.push(static_cast<Operation*>(acc1));
 
 
             EllipticToCircle* ec1 = new EllipticToCircle;
