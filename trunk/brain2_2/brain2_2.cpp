@@ -43,11 +43,22 @@ PortMapping B2_2::_step(const PortMapping& output){
 				alp = 2.0*M_PI - alp;
 		}
 		alp = alp / (2*M_PI);
+
 		r1 = sqrt(pow(output.find(EARTH_X)->second, 2) + pow(output.find(EARTH_Y)->second, 2));
-		rt = 0.0;
-		int i = 0;
+
+		double t = alp*2.0*M_PI*sqrt(pow(r1+r1,3.0)/(8.0*MU_CONST));
+		double at3 = MU_CONST*pow(t/(2.0*M_PI),2.0);
+		double at = pow(at3,1.0/3.0);
+		double rt = 2.0*at - r1;
+		
+		//rt = 0.0;
+		int i = 1;
 		while (rt < EARTH_RADIUS + 1000){
-			rt = r1 * (pow(8.0*pow((alp+i),2),1.0/3) - 1.0);
+			//rt = r1 * (pow(8.0*pow((alp+i),2),1.0/3) - 1.0);
+			t = (alp+i)*2.0*M_PI*sqrt(pow(r1+r1,3.0)/(8.0*MU_CONST));
+			at3 = MU_CONST*pow(t/(2.0*M_PI),2.0);
+			at = pow(at3,1.0/3.0);
+			rt = 2.0*at - r1;
 			i++;
 		}
 		target.minR.x = r1;
