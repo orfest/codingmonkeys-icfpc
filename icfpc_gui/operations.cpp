@@ -12,15 +12,15 @@ PortMapping Hohman::step(const PortMapping& output){
 	res[VX_PORT] = 0;
 	res[VY_PORT] = 0;
 
+	Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
 	if (timestep == 0) {
 		state = RUNNING;
-		r1 = sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
-		r2 = sqrt(pow(target.maxR.x, 2) + pow(target.maxR.y, 2));
+        r1 = target.minR.length();// sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
+		r2 = target.maxR.length();// sqrt(pow(target.maxR.x, 2) + pow(target.maxR.y, 2));
 
 		transferTime = M_PI * sqrt(pow(r1 + r2, 3) / (8 * MU_CONST));
 		double delta_v1 = sqrt(MU_CONST / r1) * (sqrt(2 * r2 / (r1 + r2)) - 1);
 		Vector prevEarth(Brain::prevInput.find(EARTH_X)->second, Brain::prevInput.find(EARTH_Y)->second);
-		Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
 		Vector moveDir = prevEarth - curEarth;
 		Vector tangent(curEarth.y, -curEarth.x);
 		tangent.normalize();
@@ -32,6 +32,9 @@ PortMapping Hohman::step(const PortMapping& output){
 		res[VX_PORT] = delta.x;
 		res[VY_PORT] = delta.y;
 	}
+
+    int alp = estimateTimeToPerihelionFormula(curEarth, target);
+    int i = 1;
 
 	if (timestep == ceil(transferTime)) {
 		assert(ceil(transferTime) > 1);
@@ -194,4 +197,65 @@ PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 			state = COMPLETE;
 		}
 	return res;
+}
+
+PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+	Vector position(-output.find(EARTH_X)->second,-output.find(EARTH_Y)->second);
+    double dist = (position-point).length();
+    if (timestep == 0){
+        state = RUNNING;
+    } else if (timestep > 1){
+        if (dist < 1000){
+            state = COMPLETE;
+        } else if (dist > curDistance && curDistance < prevDistance){
+            state = COMPLETE;
+        }
+    }
+
+    prevDistance = curDistance;
+    curDistance = dist;
+    timestep++;
+	return res;
+}
+
+int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
+    long double a = (orbit.maxR - orbit.minR).length()*0.5;
+    long double ea = (orbit.maxR + orbit.minR).length()*0.5;
+    long double e = ea / a;
+    long double bb_aa = 1 - e*e;
+    long double bb = bb_aa * a*a;
+    long double b = sqrt(bb);
+    long double p = a*(1-e*e);//b*b/a;
+    long double bb_a = bb_aa*a;
+    long double r = point.length();
+    long double cosphi = (p-r) / (r*e);
+    if (cosphi > 1.0) cosphi = 1.0;
+    if (cosphi < -1.0) cosphi = -1.0;
+    long double phi = acos(cosphi);
+
+    long double A = pow(((1+e)/(1-e)),2);
+
+    long double tnp2 = tan(phi*0.5);
+    long double beta = tnp2 / sqrt(A);
+
+    long double pre = 2 / (pow((1-e),2) * sqrt(A));
+    long double sum1 = (-1+(1/A))*0.25*sin(2*beta);
+    long double sum2 = (-0.5 + 1/A)*beta;
+    long double area = -pre * (sum1 + sum2) * p * p * 0.5;
+
+    long double total_area = M_PI * a * b; 
+    //1927709481952258.5
+
+    long double r1 = orbit.maxR.length();
+    long double r2 = orbit.minR.length();
+    long double total_time = 2*M_PI*sqrt( pow(r1+r2,3) / (8*MU_CONST) );
+
+    long double res_time = total_time * area / total_area;
+    long double fixed_time = total_time * 0.5 - res_time;
+    return (int)fixed_time;
 }

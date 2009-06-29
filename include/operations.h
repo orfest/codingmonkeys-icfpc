@@ -71,6 +71,16 @@ public:
 	double transferTime;
 };
 
+class FreeFlyToCertainPoint : public Operation {
+public:
+	virtual PortMapping step(const PortMapping& output);
+	
+	double transferTime;
+    double curDistance;
+    double prevDistance;
+    Vector point;
+};
+
 class FlipDirection : public Operation {
 public:
 	virtual PortMapping step(const PortMapping& output);
@@ -78,6 +88,7 @@ private:
     Vector prev;
 };
 
+int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit);
 
 
 
