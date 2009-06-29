@@ -42,14 +42,16 @@ PortMapping B3_3::_step(const PortMapping& output){
 		hoh1.SetTarget(target);
 		operation_list.push(static_cast<Operation*>(&hoh1));
 	} else if (step == 1) {
-		//double alp = 7291.5;//estimateTimeToPerihelion(target);
 		Orbit target;
 		target.minR = orbits[0].minR;
 		target.maxR = orbits[1].minR;
-		double alp = -87.5;
+		Vector pos(output.find(TARGET_X)->second - output.find(EARTH_X)->second,
+			output.find(TARGET_Y)->second - output.find(EARTH_Y)->second);
+		double alp = estimateTimeToPerihelionFormula(pos,orbits[1]);//-87.5;
 		double r0 = sqrt(pow(orbits[1].minR.x,2) + pow(orbits[1].minR.y,2));
 		double r1 = sqrt(pow(orbits[1].maxR.x,2) + pow(orbits[1].maxR.y,2));
 
+		//alp += M_PI*sqrt(pow(r0+r1,3.0)/(8.0*MU_CONST));
 		double t = alp;//2.0*M_PI*sqrt(pow(r0+r1,3.0)/(8.0*MU_CONST)) - 87.5;
 		double at3 = MU_CONST*pow(t/(2.0*M_PI),2.0);
 		double at = pow(at3,1.0/3.0);

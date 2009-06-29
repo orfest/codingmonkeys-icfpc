@@ -12,7 +12,7 @@ PortMapping Hohman::step(const PortMapping& output){
 	res[VX_PORT] = 0;
 	res[VY_PORT] = 0;
 
-	Vector curEarth(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
+	Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
 	if (timestep == 0) {
 		state = RUNNING;
         r1 = target.minR.length();// sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
@@ -259,7 +259,7 @@ double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) 
     long double total_time = 2*M_PI*sqrt( pow(r1+r2,3) / (8*MU_CONST) );
 
     long double res_time = total_time * area / total_area;
-    long double fixed_time = total_time * 0.5 - res_time;
+    long double fixed_time = /*total_time * 0.5 -*/ res_time;
 
     Vector3D to_p(point);
     Vector3D to_apo(orbit.minR);
