@@ -5,6 +5,7 @@
 #include <assert.h>
 
 #include "vector.h"
+#include "vm.h"
 
 PortMapping Hohman::step(const PortMapping& output){
 	PortMapping res;
@@ -32,9 +33,6 @@ PortMapping Hohman::step(const PortMapping& output){
 		res[VX_PORT] = delta.x;
 		res[VY_PORT] = delta.y;
 	}
-
-    int alp = estimateTimeToPerihelionFormula(curEarth, target);
-    int i = 1;
 
 	if (timestep == ceil(transferTime)) {
 		assert(ceil(transferTime) > 1);
@@ -181,7 +179,37 @@ PortMapping FlipDirection::step(const PortMapping& output){
 	timestep++;
 	return res;
 }
+#if 0
+PortMapping Accelerate::step(const PortMapping& output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
 
+    if (timestep == 0){
+        state = RUNNING;
+        prev = Vector(
+            -output.find(EARTH_X)->second,
+            -output.find(EARTH_Y)->second
+            );
+    } else {
+        Vector cur(
+            -output.find(EARTH_X)->second,
+            -output.find(EARTH_Y)->second
+            );
+        Vector move(cur);
+        move -= prev;
+        move.normalize();
+        move *= delta;
+	    res[VX_PORT] = move.x;
+    	res[VY_PORT] = move.y;
+        state = COMPLETE;
+    }
+
+	timestep++;
+	return res;
+}
+#endif
 PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -199,6 +227,7 @@ PortMapping FreeFlyToOpositPoint::step(const PortMapping& output){
 	return res;
 }
 
+#if 0
 PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
 	PortMapping res;
 	res[SCENARIO_PORT] = 0;
@@ -223,6 +252,33 @@ PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
 	return res;
 }
 
+PortMapping MeetShip::step(const PortMapping& output){
+	PortMapping res;
+	res[SCENARIO_PORT] = 0;
+	res[VX_PORT] = 0;
+	res[VY_PORT] = 0;
+
+    if (timestep == 0){
+        state = RUNNING;
+    }
+
+    Vector pos(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
+    Vector toShip(output.find(TARGETN_X(ship))->second, output.find(TARGETN_Y(ship))->second);
+    if (timestep == 3){
+        
+    }
+
+    double dist = toShip.length();
+    if (dist < 1000){
+        state = COMPLETE;
+    }
+
+    prev = pos;
+	timestep++;
+	return res;
+}
+#endif
+
 double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
     long double a = (orbit.maxR - orbit.minR).length()*0.5;
     long double ea = (orbit.maxR + orbit.minR).length()*0.5;
@@ -233,12 +289,26 @@ double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) 
     long double p = a*(1-e*e);//b*b/a;
     long double bb_a = bb_aa*a;
     long double r = point.length();
-    long double cosphi = (p-r) / (r*e);
+
+    long double r1 = orbit.maxR.length();
+    long double r2 = orbit.minR.length();
+    long double total_time = 2*M_PI*sqrt( pow(r1+r2,3) / (8*MU_CONST) );
+
+    long double A,cosphi,pre_1;
+    bool f = false;
+    if (r > a){
+        cosphi = (r-p) / (r*e);
+        A = ((1-e)/(1+e));
+        pre_1 = pow((1+e),2);
+        f = true;
+    } else {
+        cosphi = (p-r) / (r*e);
+        A = ((1+e)/(1-e));
+        pre_1 = pow((1-e),2);
+    }
     if (cosphi > 1.0) cosphi = 1.0;
     if (cosphi < -1.0) cosphi = -1.0;
     long double phi = acos(cosphi);
-
-    long double A = pow(((1+e)/(1-e)),1);
 
     long double cosphi2 = pow(cos(phi*0.5),2);
     long double cosb2 = A*cosphi2 / (1 + (A-1)*cosphi2);
@@ -246,7 +316,7 @@ double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) 
 //   long double tnp2 = tan(phi*0.5);
 //    long double beta = tnp2 / sqrt(A);
 
-    long double pre = 2 / (pow((1-e),2) * sqrt(A));
+    long double pre = 2 / (pre_1 * sqrt(A));
     long double sum1 = (-1+(1/A))*0.25*sin(2*beta);
     long double sum2 = beta * ( ((1/A) - 1)*0.5 + 1  );
     long double area = pre * (sum1 + sum2) * p * p * 0.5;
@@ -254,12 +324,12 @@ double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) 
     long double total_area = M_PI * a * b; 
     //1927709481952258.5
 
-    long double r1 = orbit.maxR.length();
-    long double r2 = orbit.minR.length();
-    long double total_time = 2*M_PI*sqrt( pow(r1+r2,3) / (8*MU_CONST) );
-
     long double res_time = total_time * area / total_area;
-    long double fixed_time = /*total_time * 0.5 -*/ res_time;
+    long double fixed_time = res_time;
+    if (f){
+        fixed_time = total_time * 0.5 - fixed_time;
+    }
+    //long double fixed_time = /*total_time * 0.5 - */res_time;
 
     Vector3D to_p(point);
     Vector3D to_apo(orbit.minR);
