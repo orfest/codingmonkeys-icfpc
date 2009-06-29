@@ -12,7 +12,7 @@ PortMapping Hohman::step(const PortMapping& output){
 	res[VX_PORT] = 0;
 	res[VY_PORT] = 0;
 
-	Vector curEarth(output.find(EARTH_X)->second, output.find(EARTH_Y)->second);
+	Vector curEarth(-output.find(EARTH_X)->second, -output.find(EARTH_Y)->second);
 	if (timestep == 0) {
 		state = RUNNING;
         r1 = target.minR.length();// sqrt(pow(target.minR.x, 2) + pow(target.minR.y, 2));
@@ -223,7 +223,7 @@ PortMapping FreeFlyToCertainPoint::step(const PortMapping& output){
 	return res;
 }
 
-int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
+double estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
     long double a = (orbit.maxR - orbit.minR).length()*0.5;
     long double ea = (orbit.maxR + orbit.minR).length()*0.5;
     long double e = ea / a;
@@ -238,15 +238,15 @@ int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
     if (cosphi < -1.0) cosphi = -1.0;
     long double phi = acos(cosphi);
 
-    long double A = pow(((1+e)/(1-e)),2);
+    long double A = pow(((1+e)/(1-e)),1);
 
     long double tnp2 = tan(phi*0.5);
     long double beta = tnp2 / sqrt(A);
 
     long double pre = 2 / (pow((1-e),2) * sqrt(A));
     long double sum1 = (-1+(1/A))*0.25*sin(2*beta);
-    long double sum2 = (-0.5 + 1/A)*beta;
-    long double area = -pre * (sum1 + sum2) * p * p * 0.5;
+    long double sum2 = beta * ( ((1/A) - 1)*0.5 + 1  );
+    long double area = pre * (sum1 + sum2) * p * p * 0.5;
 
     long double total_area = M_PI * a * b; 
     //1927709481952258.5
@@ -257,5 +257,13 @@ int estimateTimeToPerihelionFormula(const Vector& point, const Orbit& orbit) {
 
     long double res_time = total_time * area / total_area;
     long double fixed_time = total_time * 0.5 - res_time;
-    return (int)fixed_time;
+
+    Vector3D to_p(point);
+    Vector3D to_apo(orbit.minR);
+    Vector3D to_p_apo = Vector3D::crossProduct(to_apo, to_p);
+    if ((to_p_apo.z > 0 && !orbit.clockwise) || (to_p_apo.z < 0 && orbit.clockwise)){
+        fixed_time = total_time - fixed_time;
+    }
+
+    return (double)fixed_time;
 }
